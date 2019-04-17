@@ -1,0 +1,21 @@
+{
+  "name": "lss2000",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "webpack",
+    "lint": "tslint",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Vishal Mistry",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-loader": "^5.3.3",
+    "tslint": "^5.15.0",
+    "typescript": "^3.4.3",
+    "typescript-tslint-plugin": "^0.3.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  }
+}
