@@ -1,7 +1,7 @@
 export interface IColor {
-    r: number;
-    g: number;
-    b: number;
+    readonly r: number;
+    readonly g: number;
+    readonly b: number;
 }
 
 export class Palette {
