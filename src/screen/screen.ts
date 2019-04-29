@@ -370,6 +370,10 @@ export class Screen {
         this.canvas.removeEventListener('click', this.onCanvasMouseClick);
         this.canvas.removeEventListener('dblclick', this.onCanvasMouseDblClick);
 
+        this.renderGlyph(
+            this._state[this.mouseLocation.y][this.mouseLocation.x],
+            this.mouseLocation.x,
+            this.mouseLocation.y);
         this.canvas.style.cursor = this._originalCanvasCursor;
         this._mouseLocation = { x: 0, y: 0 };
     }
