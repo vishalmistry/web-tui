@@ -17,7 +17,7 @@ export class Glyph {
     private _code = 32;
     private _foreground = 0;
     private _background = 0;
-    private eventHandlers = new Array<GlyphPropertyChangedEventHandler>();
+    private _eventHandlers = new Array<GlyphPropertyChangedEventHandler>();
 
     public get code() {
         return this._code;
@@ -93,20 +93,20 @@ export class Glyph {
     }
 
     public addEventHandler(_event: GlyphEvents, handler: GlyphPropertyChangedEventHandler) {
-        if (this.eventHandlers.indexOf(handler) < 0) {
-            this.eventHandlers.push(handler);
+        if (this._eventHandlers.indexOf(handler) < 0) {
+            this._eventHandlers.push(handler);
         }
     }
 
     public removeEventHandler(_event: GlyphEvents, handler: GlyphPropertyChangedEventHandler) {
-        const index = this.eventHandlers.indexOf(handler);
+        const index = this._eventHandlers.indexOf(handler);
         if (index >= 0) {
-            this.eventHandlers.splice(index, 1);
+            this._eventHandlers.splice(index, 1);
         }
     }
 
     private fireChangedEvent(property: GlyphProperty) {
-        for (const handler of this.eventHandlers) {
+        for (const handler of this._eventHandlers) {
             try {
                 handler(property);
             } catch (err) {

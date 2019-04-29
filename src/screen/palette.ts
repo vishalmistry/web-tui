@@ -13,7 +13,7 @@ export class Palette {
     ].map((c) => Palette.parseColor(c) || { r: 0, g: 0, b: 0 }), 7, 0);
 
     private constructor(
-        private colors: IColor[],
+        private _colors: IColor[],
         private _defaultForegroundCode: number,
         private _defaultBackgroundCode: number) {
     }
@@ -28,18 +28,18 @@ export class Palette {
 
     public getColor(code: number): IColor {
         this.validateCode(code);
-        return this.colors[code];
+        return this._colors[code];
     }
 
     public getInvertedColor(code: number): IColor {
         this.validateCode(code);
-        const invertedCode = (code + 7) % this.colors.length;
-        return this.colors[invertedCode];
+        const invertedCode = (code + 7) % this._colors.length;
+        return this._colors[invertedCode];
     }
 
     private validateCode(code: number) {
-        if (code < 0 || code >= this.colors.length) {
-            throw new Error(`Palette color code must be in the range of 0..${this.colors.length}`);
+        if (code < 0 || code >= this._colors.length) {
+            throw new Error(`Palette color code must be in the range of 0..${this._colors.length}`);
         }
     }
 

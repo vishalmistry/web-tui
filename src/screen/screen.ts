@@ -33,28 +33,33 @@ export interface IScreenMouseEvent extends IScreenInputEvent<ScreenMouseEventTyp
 }
 
 export class Screen {
-    private glyphWidth = Glyph.WIDTH;
-    private glyphHeight = Glyph.HEIGHT;
+    private static readonly CURSOR_BLINK_INTERVAL = 100;
 
-    private context: CanvasRenderingContext2D;
+    private _glyphWidth = Glyph.WIDTH;
+    private _glyphHeight = Glyph.HEIGHT;
+
+    private _context: CanvasRenderingContext2D;
     private _columns: number;
     private _rows: number;
-    private palette = Palette.default;
-    private state: Glyph[][];
+    private _palette = Palette.default;
+    private _state: Glyph[][];
 
-    public foreground = this.palette.defaultForegroundCode;
-    public background = this.palette.defaultBackgroundCode;
-    private cursorLocation: ICoord = { x: 0, y: 0 };
+    public foreground = this._palette.defaultForegroundCode;
+    public background = this._palette.defaultBackgroundCode;
+
+    private _isCursorVisible = false;
+    private _cursorBlinkTimerHandle?: number;
+    private _cursorLocation: ICoord = { x: 0, y: 0 };
 
     private _isKeyboardEnabled = false;
-    private originalCanvasTabIndex = -1;
+    private _originalCanvasTabIndex = -1;
 
     private _isMouseEnabled = false;
-    private originalCanvasCursor: string | null = null;
-    private mouseLocation: ICoord = { x: 0, y: 0 };
+    private _originalCanvasCursor: string | null = null;
+    private _mouseLocation: ICoord = { x: 0, y: 0 };
 
-    private eventHandlers: { [key in ScreenMouseEventType]?: Array<EventHandler<IScreenMouseEvent>>; } &
-                           { [key in ScreenKeyboardEventType]?: Array<EventHandler<IScreenKeyboardEvent>>; } = {};
+    private _eventHandlers: { [key in ScreenMouseEventType]?: Array<EventHandler<IScreenMouseEvent>>; } &
+                            { [key in ScreenKeyboardEventType]?: Array<EventHandler<IScreenKeyboardEvent>>; } = {};
 
     constructor(private canvas: HTMLCanvasElement) {
         const context = canvas.getContext('2d');
@@ -62,10 +67,10 @@ export class Screen {
             throw new Error('Unable to get canvas 2D context');
         }
 
-        this.context = context;
-        this._columns = Math.floor(canvas.width / this.glyphWidth);
-        this._rows = Math.floor(canvas.height / this.glyphHeight);
-        this.state = Screen.createState(
+        this._context = context;
+        this._columns = Math.floor(canvas.width / this._glyphWidth);
+        this._rows = Math.floor(canvas.height / this._glyphHeight);
+        this._state = Screen.createState(
             this._columns,
             this._rows,
             this.foreground,
@@ -80,6 +85,31 @@ export class Screen {
 
     public get rows() {
         return this._rows;
+    }
+
+    public get cursorLocation() {
+        return this._cursorLocation;
+    }
+
+    private get mouseLocation() {
+        return this._mouseLocation;
+    }
+
+    public get isCursorVisible() {
+        return this._isCursorVisible;
+    }
+
+    public set isCursorVisible(isVisible: boolean) {
+        if (this._isCursorVisible === isVisible) {
+            return;
+        }
+
+        this._isCursorVisible = isVisible;
+        if (this._isCursorVisible) {
+            this.showCursor();
+        } else {
+            this.hideCursor();
+        }
     }
 
     public get isKeyboardEnabled() {
@@ -135,11 +165,15 @@ export class Screen {
             throw new Error('Invalid row');
         }
 
-        this.cursorLocation = newCursorLocation;
+        if (this.isCursorVisible) {
+            this.rerenderGlyphAtCursor();
+        }
+
+        this._cursorLocation = newCursorLocation;
     }
 
     public setCharacter(char: string | number): void {
-        const glyph = this.state[this.cursorLocation.y][this.cursorLocation.x];
+        const glyph = this._state[this.cursorLocation.y][this.cursorLocation.x];
         if (typeof char === 'string') {
             glyph.character = char;
         } else if (typeof char === 'number') {
@@ -155,7 +189,7 @@ export class Screen {
         let x = this.cursorLocation.x;
         let y = this.cursorLocation.y;
         for (const c of str) {
-            const glyph = this.state[y][x++];
+            const glyph = this._state[y][x++];
             glyph.character = c;
             glyph.foreground = this.foreground;
             glyph.background = this.background;
@@ -175,7 +209,7 @@ export class Screen {
     public render(x: number, y: number, w: number, h: number) {
         for (let j = y; j < (y + h); j++) {
             for (let i = x; i < (x + w); i++) {
-                this.renderGlyph(this.state[j][i], i, j);
+                this.renderGlyph(this._state[j][i], i, j);
             }
         }
     }
@@ -183,10 +217,10 @@ export class Screen {
     public addEventHandler(event: ScreenKeyboardEventType, handler: EventHandler<IScreenKeyboardEvent>): void;
     public addEventHandler(event: ScreenMouseEventType, handler: EventHandler<IScreenMouseEvent>): void;
     addEventHandler(event: ScreenInputEventTypes, handler: EventHandler<any>) {
-        let eventHandlers = this.eventHandlers[event];
+        let eventHandlers = this._eventHandlers[event];
         if (eventHandlers === undefined) {
             eventHandlers = [];
-            this.eventHandlers[event] = eventHandlers;
+            this._eventHandlers[event] = eventHandlers;
         }
 
         if (eventHandlers.indexOf(handler) < 0) {
@@ -197,7 +231,7 @@ export class Screen {
     public removeEventHandler(event: ScreenKeyboardEventType, handler: EventHandler<IScreenKeyboardEvent>): void;
     public removeEventHandler(event: ScreenMouseEventType, handler: EventHandler<IScreenMouseEvent>): void;
     removeEventHandler(event:  ScreenInputEventTypes, handler: EventHandler<any>) {
-        const eventHandlers = this.eventHandlers[event];
+        const eventHandlers = this._eventHandlers[event];
         if (eventHandlers === undefined) {
             return;
         }
@@ -209,18 +243,37 @@ export class Screen {
     }
 
     public destroy() {
+        this.isCursorVisible = false;
         this.isKeyboardEnabled = false;
         this.isMouseEnabled = false;
     }
 
+    private rerenderGlyphAtCursor(invert = false) {
+        this.renderGlyph(
+            this._state[this.cursorLocation.y][this.cursorLocation.x],
+            this.cursorLocation.x,
+            this.cursorLocation.y,
+            invert);
+    }
+
     private renderGlyph = (g: Glyph, x: number, y: number, invert = false) => {
-        g.render(this.context, x * this.glyphWidth, y * this.glyphHeight, this.palette, invert);
+        g.render(this._context, x * this._glyphWidth, y * this._glyphHeight, this._palette, invert);
+    }
+
+    private renderCursor(x: number, y: number, invert = false) {
+        const absX = x * this._glyphWidth;
+        const absY = y * this._glyphHeight;
+        const color = invert
+            ? this._palette.getInvertedColor(this._state[y][x].foreground)
+            : this._palette.getColor(this._state[y][x].foreground);
+
+        this._context.fillStyle = `rgb(${color.r},${color.g},${color.b})`;
+        this._context.fillRect(absX, absY + this._glyphHeight - 3, this._glyphWidth, 2);
     }
 
     private onMouseMove(event: MouseEvent, previous: ICoord, current: ICoord) {
-        this.renderGlyph(this.state[previous.y][previous.x], previous.x, previous.y);
-        this.renderGlyph(this.state[current.y][current.x], current.x, current.y, true);
-
+        this.renderGlyph(this._state[previous.y][previous.x], previous.x, previous.y);
+        this.renderGlyph(this._state[current.y][current.x], current.x, current.y, true);
         this.fireMouseEvent(event, 'mousemove');
     }
 
@@ -229,13 +282,13 @@ export class Screen {
     private onCanvasKeyPress = (event: KeyboardEvent) => this.fireKeyboardEvent(event, 'keypress');
     private onCanvasContextMenu = (event: MouseEvent) => event.preventDefault();
     private onCanvasMouseMove = (event: MouseEvent) => {
-        const posX = Math.floor(event.clientX / this.glyphWidth);
-        const posY = Math.floor(event.clientY / this.glyphHeight);
+        const posX = Math.floor(event.clientX / this._glyphWidth);
+        const posY = Math.floor(event.clientY / this._glyphHeight);
 
         if (posX < this.columns && posY < this.rows) {
             if (this.mouseLocation.x !== posX || this.mouseLocation.y !== posY) {
                 const oldLocation = this.mouseLocation;
-                this.mouseLocation = { x: posX, y: posY };
+                this._mouseLocation = { x: posX, y: posY };
                 this.onMouseMove(event, oldLocation, this.mouseLocation);
             }
         }
@@ -245,13 +298,33 @@ export class Screen {
     private onCanvasMouseClick = (event: MouseEvent) => this.fireMouseEvent(event, 'click');
     private onCanvasMouseDblClick = (event: MouseEvent) => this.fireMouseEvent(event, 'dblclick');
 
+    private showCursor() {
+        let isCursorGlyphVisible = false;
+        this._cursorBlinkTimerHandle = setInterval(() => {
+            const isMouseAtCursor = this.cursorLocation.x === this.mouseLocation.x &&
+                                    this.cursorLocation.y === this.mouseLocation.y;
+
+            isCursorGlyphVisible = !isCursorGlyphVisible;
+            if (isCursorGlyphVisible) {
+                this.renderCursor(this.cursorLocation.x, this.cursorLocation.y, isMouseAtCursor);
+            } else {
+                this.rerenderGlyphAtCursor(isMouseAtCursor);
+            }
+        }, Screen.CURSOR_BLINK_INTERVAL);
+    }
+
+    private hideCursor() {
+        clearInterval(this._cursorBlinkTimerHandle);
+        this.rerenderGlyphAtCursor();
+    }
+
     private enableKeyboard() {
         this.canvas.addEventListener('keydown', this.onCanvasKeyDown);
         this.canvas.addEventListener('keyup', this.onCanvasKeyUp);
         this.canvas.addEventListener('keypress', this.onCanvasKeyPress);
 
-        this.originalCanvasTabIndex = this.canvas.tabIndex;
-        if (this.originalCanvasTabIndex < 0) {
+        this._originalCanvasTabIndex = this.canvas.tabIndex;
+        if (this._originalCanvasTabIndex < 0) {
             this.canvas.tabIndex = 0;
         }
     }
@@ -261,11 +334,11 @@ export class Screen {
         this.canvas.removeEventListener('keyup', this.onCanvasKeyUp);
         this.canvas.removeEventListener('keypress', this.onCanvasKeyPress);
 
-        this.canvas.tabIndex = this.originalCanvasTabIndex;
+        this.canvas.tabIndex = this._originalCanvasTabIndex;
     }
 
     private fireKeyboardEvent(event: KeyboardEvent, screenEventType: ScreenKeyboardEventType) {
-        const handlers = this.eventHandlers[screenEventType];
+        const handlers = this._eventHandlers[screenEventType];
         Screen.fireHandlers(handlers, {
             type: screenEventType,
             key: event.key,
@@ -285,7 +358,7 @@ export class Screen {
         this.canvas.addEventListener('click', this.onCanvasMouseClick);
         this.canvas.addEventListener('dblclick', this.onCanvasMouseDblClick);
 
-        this.originalCanvasCursor = this.canvas.style.cursor;
+        this._originalCanvasCursor = this.canvas.style.cursor;
         this.canvas.style.cursor = 'none';
     }
 
@@ -297,11 +370,12 @@ export class Screen {
         this.canvas.removeEventListener('click', this.onCanvasMouseClick);
         this.canvas.removeEventListener('dblclick', this.onCanvasMouseDblClick);
 
-        this.canvas.style.cursor = this.originalCanvasCursor;
+        this.canvas.style.cursor = this._originalCanvasCursor;
+        this._mouseLocation = { x: 0, y: 0 };
     }
 
     private fireMouseEvent(event: MouseEvent, screenEventType: ScreenMouseEventType) {
-        const handlers = this.eventHandlers[screenEventType];
+        const handlers = this._eventHandlers[screenEventType];
         Screen.fireHandlers(handlers, {
             type: screenEventType,
             position: this.mouseLocation,

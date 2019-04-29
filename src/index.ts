@@ -10,28 +10,46 @@ canvas.height = window.innerHeight;
 const screen = new Screen(canvas);
 screen.isMouseEnabled = true;
 screen.isKeyboardEnabled = true;
+screen.isCursorVisible = true;
+
+screen.print('DMKC');
 
 screen.addEventHandler('mousemove', (ev) => {
     if (ev.buttons === 1) {
+        screen.moveTo(ev.position);
+    }
+    if (ev.buttons === 2) {
         screen.moveTo(ev.position);
         screen.setCharacter(219);
     }
 });
 screen.addEventHandler('mousedown', (ev) => {
-    if (ev.buttons === 1) {
-        screen.moveTo(ev.position);
-        screen.print('HELLO');
-    }
-
     if (ev.position.x === 0 && ev.position.y === 0) {
         screen.destroy();
+        return;
     }
     if (ev.position.x === 1 && ev.position.y === 0) {
         screen.isMouseEnabled = false;
+        return;
     }
     if (ev.position.x === 2 && ev.position.y === 0) {
         screen.isKeyboardEnabled = false;
+        return;
     }
+    if (ev.position.x === 3 && ev.position.y === 0) {
+        screen.isCursorVisible = !screen.isCursorVisible;
+        return;
+    }
+
+    if (ev.buttons === 1) {
+        screen.moveTo(ev.position);
+    }
+
+    if (ev.buttons === 2) {
+        screen.moveTo(ev.position);
+        screen.setCharacter(219);
+    }
+
 });
 screen.addEventHandler('keypress', (ev) => {
     screen.print(ev.key);
