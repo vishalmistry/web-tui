@@ -9,6 +9,7 @@ canvas.height = window.innerHeight;
 // tslint:disable-next-line: no-unused-expression
 const screen = new Screen(canvas);
 screen.isMouseEnabled = true;
+screen.isKeyboardEnabled = true;
 
 screen.addEventHandler('mousemove', (ev) => {
     if (ev.buttons === 1) {
@@ -28,6 +29,12 @@ screen.addEventHandler('mousedown', (ev) => {
     if (ev.position.x === 1 && ev.position.y === 0) {
         screen.isMouseEnabled = false;
     }
+    if (ev.position.x === 2 && ev.position.y === 0) {
+        screen.isKeyboardEnabled = false;
+    }
+});
+screen.addEventHandler('keypress', (ev) => {
+    screen.print(ev.key);
 });
 
 console.log(`Screen size: ${screen.columns}x${screen.rows}`);
