@@ -37,11 +37,12 @@ export class Screen {
 
     public foreground = this.palette.defaultForegroundCode;
     public background = this.palette.defaultBackgroundCode;
+    private cursorLocation: ICoord = { x: 0, y: 0 };
 
     private _isMouseEnabled = false;
     private originalCursor: string | null = null;
     private mouseLocation: ICoord = { x: 0, y: 0 };
-    private mouseEventHandlers: { [key in ScreenMouseEventType]?: ScreenMouseEventHandler[]; } = { };
+    private mouseEventHandlers: { [key in ScreenMouseEventType]?: ScreenMouseEventHandler[]; } = {};
 
     constructor(private canvas: HTMLCanvasElement) {
         const context = canvas.getContext('2d');
@@ -86,32 +87,30 @@ export class Screen {
         }
     }
 
-    public setCharacter(position: ICoord, s: string | number): void;
-    public setCharacter(x: number, y: number, n: string | number): void;
-    setCharacter(a: ICoord | number, b: string | number, c?: string | number): void {
-        let x: number;
-        let y: number;
-        let char: string | number;
+    public moveTo(position: ICoord): void;
+    public moveTo(x: number, y: number): void;
+    moveTo(a: ICoord | number, b?: number) {
+        let newCursorLocation: ICoord;
         if (isCoord(a)) {
-            x = a.x;
-            y = a.y;
-            char = b;
-        } else if (typeof a === 'number' && typeof b === 'number' && c !== undefined) {
-            x = a;
-            y = b;
-            char = c;
+            newCursorLocation = a;
+        } else if (typeof a === 'number' && typeof b === 'number') {
+            newCursorLocation = { x: a, y: b };
         } else {
             throw new Error('Bad arguments');
         }
 
-        if (x < 0 || x >= this.columns) {
+        if (newCursorLocation.x < 0 || newCursorLocation.y >= this.columns) {
             throw new Error('Invalid column');
         }
-        if (y < 0 || y >= this.rows) {
+        if (newCursorLocation.y < 0 || newCursorLocation.y >= this.rows) {
             throw new Error('Invalid row');
         }
 
-        const glyph = this.state[y][x];
+        this.cursorLocation = newCursorLocation;
+    }
+
+    public setCharacter(char: string | number): void {
+        const glyph = this.state[this.cursorLocation.y][this.cursorLocation.x];
         if (typeof char === 'string') {
             glyph.character = char;
         } else if (typeof char === 'number') {
@@ -123,40 +122,24 @@ export class Screen {
         glyph.background = this.background;
     }
 
-    public print(position: ICoord, str: string): void;
-    public print(x: number, y: number, str: string): void;
-    print(a: ICoord | number, b: number | string, c?: string): void {
-        let x: number;
-        let y: number;
-        let str: string;
-
-        if (isCoord(a) && typeof b === 'string') {
-            x = a.x;
-            y = a.y;
-            str = b;
-        } else if (typeof a === 'number' && typeof b === 'number' && typeof c === 'string') {
-            x = a;
-            y = b;
-            str = c;
-        } else {
-            throw new Error('Bad arguments');
-        }
-
-        if (y < 0 || y >= this.rows) {
-            throw new Error('Invalid row');
-        }
-        if (x < 0) {
-            throw new Error('Invalid column');
-        }
-        if (str.length > (this.columns - x)) {
-            throw new Error('String is too long to print at specified position');
-        }
-
-        for (let i = 0; i < str.length; i++) {
-            const glyph = this.state[y][x + i];
-            glyph.character = str[i];
+    public print(str: string): void {
+        let x = this.cursorLocation.x;
+        let y = this.cursorLocation.y;
+        for (const c of str) {
+            const glyph = this.state[y][x++];
+            glyph.character = c;
             glyph.foreground = this.foreground;
             glyph.background = this.background;
+
+            if (x >= this.columns) {
+                y++;
+                if (y >= this.rows) {
+                    y--;
+                    x--;
+                } else {
+                    x = 0;
+                }
+            }
         }
     }
 
