@@ -1,11 +1,11 @@
 import { Glyph } from '.';
 import { Palette } from './palette';
 
-interface ICoord {
+interface Point {
     readonly x: number;
     readonly y: number;
 }
-function isCoord(object: any): object is ICoord {
+function isCoord(object: any): object is Point {
     return typeof object === 'object' && 'x' in object && 'y' in object;
 }
 
@@ -14,7 +14,7 @@ export type ScreenKeyboardEventType = 'keyup' | 'keydown' | 'keypress';
 export type ScreenMouseEventType = 'mousemove' | 'mousedown' | 'mouseup' | 'click' | 'dblclick';
 export type ScreenInputEventTypes = ScreenKeyboardEventType | ScreenMouseEventType;
 
-export interface IScreenInputEvent<T extends string> {
+export interface ScreenInputEvent<T extends string> {
     readonly type: T;
     readonly shiftKey: boolean;
     readonly ctrlKey: boolean;
@@ -22,13 +22,13 @@ export interface IScreenInputEvent<T extends string> {
     readonly metaKey: boolean;
 }
 
-export interface IScreenKeyboardEvent extends IScreenInputEvent<ScreenKeyboardEventType> {
+export interface ScreenKeyboardEvent extends ScreenInputEvent<ScreenKeyboardEventType> {
     readonly code: string;
     readonly key: string;
 }
 
-export interface IScreenMouseEvent extends IScreenInputEvent<ScreenMouseEventType> {
-    readonly position: ICoord;
+export interface ScreenMouseEvent extends ScreenInputEvent<ScreenMouseEventType> {
+    readonly position: Point;
     readonly buttons: number;
 }
 
@@ -49,17 +49,17 @@ export class Screen {
 
     private _isCursorVisible = false;
     private _cursorBlinkTimerHandle?: number;
-    private _cursorLocation: ICoord = { x: 0, y: 0 };
+    private _cursorLocation: Point = { x: 0, y: 0 };
 
     private _isKeyboardEnabled = false;
     private _originalCanvasTabIndex = -1;
 
     private _isMouseEnabled = false;
     private _originalCanvasCursor: string | null = null;
-    private _mouseLocation: ICoord = { x: 0, y: 0 };
+    private _mouseLocation: Point = { x: 0, y: 0 };
 
-    private _eventHandlers: { [key in ScreenMouseEventType]?: Array<EventHandler<IScreenMouseEvent>>; } &
-                            { [key in ScreenKeyboardEventType]?: Array<EventHandler<IScreenKeyboardEvent>>; } = {};
+    private _eventHandlers: { [key in ScreenMouseEventType]?: Array<EventHandler<ScreenMouseEvent>>; } &
+                            { [key in ScreenKeyboardEventType]?: Array<EventHandler<ScreenKeyboardEvent>>; } = {};
 
     constructor(private canvas: HTMLCanvasElement) {
         const context = canvas.getContext('2d');
@@ -146,10 +146,10 @@ export class Screen {
         }
     }
 
-    public moveTo(position: ICoord): void;
+    public moveTo(position: Point): void;
     public moveTo(x: number, y: number): void;
-    moveTo(a: ICoord | number, b?: number) {
-        let newCursorLocation: ICoord;
+    moveTo(a: Point | number, b?: number) {
+        let newCursorLocation: Point;
         if (isCoord(a)) {
             newCursorLocation = a;
         } else if (typeof a === 'number' && typeof b === 'number') {
@@ -204,6 +204,8 @@ export class Screen {
                 }
             }
         }
+
+        this.moveTo(x, y);
     }
 
     public render(x: number, y: number, w: number, h: number) {
@@ -214,8 +216,8 @@ export class Screen {
         }
     }
 
-    public addEventHandler(event: ScreenKeyboardEventType, handler: EventHandler<IScreenKeyboardEvent>): void;
-    public addEventHandler(event: ScreenMouseEventType, handler: EventHandler<IScreenMouseEvent>): void;
+    public addEventHandler(event: ScreenKeyboardEventType, handler: EventHandler<ScreenKeyboardEvent>): void;
+    public addEventHandler(event: ScreenMouseEventType, handler: EventHandler<ScreenMouseEvent>): void;
     addEventHandler(event: ScreenInputEventTypes, handler: EventHandler<any>) {
         let eventHandlers = this._eventHandlers[event];
         if (eventHandlers === undefined) {
@@ -228,8 +230,8 @@ export class Screen {
         }
     }
 
-    public removeEventHandler(event: ScreenKeyboardEventType, handler: EventHandler<IScreenKeyboardEvent>): void;
-    public removeEventHandler(event: ScreenMouseEventType, handler: EventHandler<IScreenMouseEvent>): void;
+    public removeEventHandler(event: ScreenKeyboardEventType, handler: EventHandler<ScreenKeyboardEvent>): void;
+    public removeEventHandler(event: ScreenMouseEventType, handler: EventHandler<ScreenMouseEvent>): void;
     removeEventHandler(event:  ScreenInputEventTypes, handler: EventHandler<any>) {
         const eventHandlers = this._eventHandlers[event];
         if (eventHandlers === undefined) {
@@ -271,7 +273,7 @@ export class Screen {
         this._context.fillRect(absX, absY + this._glyphHeight - 3, this._glyphWidth, 2);
     }
 
-    private onMouseMove(event: MouseEvent, previous: ICoord, current: ICoord) {
+    private onMouseMove(event: MouseEvent, previous: Point, current: Point) {
         this.renderGlyph(this._state[previous.y][previous.x], previous.x, previous.y);
         this.renderGlyph(this._state[current.y][current.x], current.x, current.y, true);
         this.fireMouseEvent(event, 'mousemove');

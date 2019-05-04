@@ -1,4 +1,4 @@
-export interface IColor {
+export interface Color {
     readonly r: number;
     readonly g: number;
     readonly b: number;
@@ -13,7 +13,7 @@ export class Palette {
     ].map((c) => Palette.parseColor(c) || { r: 0, g: 0, b: 0 }), 7, 0);
 
     private constructor(
-        private _colors: IColor[],
+        private _colors: Color[],
         private _defaultForegroundCode: number,
         private _defaultBackgroundCode: number) {
     }
@@ -26,12 +26,12 @@ export class Palette {
         return this._defaultBackgroundCode;
     }
 
-    public getColor(code: number): IColor {
+    public getColor(code: number): Color {
         this.validateCode(code);
         return this._colors[code];
     }
 
-    public getInvertedColor(code: number): IColor {
+    public getInvertedColor(code: number): Color {
         this.validateCode(code);
         const invertedCode = (code + 7) % this._colors.length;
         return this._colors[invertedCode];
@@ -43,7 +43,7 @@ export class Palette {
         }
     }
 
-    private static parseColor(input: string): IColor | undefined {
+    private static parseColor(input: string): Color | undefined {
         let m = input.match(/^#([0-9a-f]{3})$/i);
         if (m !== null) {
             // in three-character format, each value is multiplied by 0x11 to give an
