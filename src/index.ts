@@ -23,11 +23,15 @@ v3_1.background = 6;
 const v3_2 = new View(screen, new Rect(2, 0, 2, 3));
 v3_2.background = 0;
 
+const v3_3 = new View(screen, new Rect(1, 1, 4, 1));
+v3_3.background = 10;
+
 const v2 = new View(screen, new Rect(2, 3, 5, 5));
 v2.background = 3;
 v2.addChild(v3);
-v2.addChild(v3_1);
+v2.addChild(v3_3);
 v2.addChild(v3_2);
+v2.addChild(v3_1);
 
 const v1 = new View(screen, new Rect(2, 2, 10, 10));
 v1.addChild(v2);

@@ -7,7 +7,7 @@ export class Application {
     }
 
     public start() {
-        this.mainView.redraw();
+        this.mainView.draw();
 
         this.screen.addEventHandler('click', this.onMouseClick);
     }
@@ -16,6 +16,7 @@ export class Application {
         const target = Application.findTarget(this.mainView, event.position.x, event.position.y);
         if (target.view !== undefined) {
             console.log(`${target.view.index} @ (${target.x}, ${target.y})`);
+            target.view.click();
         }
     }
 

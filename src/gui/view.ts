@@ -29,33 +29,59 @@ export class View {
         view._parent = this;
     }
 
-    public redraw() {
-        this._screen.background = this.background;
-        this._screen.foreground = 15;
-        for (let y = 0; y < this._bounds.height; y++) {
-            for (let x = 0; x < this._bounds.width; x++) {
-                this.moveTo(x, y);
-                this.setCharacter(176);
-            }
+    public draw(region?: Rect) {
+        if (region === undefined) {
+            region = new Rect(0, 0, this.bounds.width, this.bounds.height);
         }
 
-        this.moveTo(0, 0);
-        this.setCharacter(`${this.index}`);
+        console.log(`DRAW ${this.index} [${region.left}, ${region.top}, ${region.right}, ${region.bottom}]`);
+
+        this._screen.background = this.background;
+        this._screen.foreground = 15;
+        for (let y = region.top; y <= region.bottom; y++) {
+            for (let x = region.left; x <= region.right; x++) {
+                this.moveTo(x, y);
+                this.setCharacter(' ');
+            }
+        }
+        if (region.contains(0, 0)) {
+            this.moveTo(0, 0);
+            this.setCharacter(`${this.index}`);
+        }
 
         for (const child of this.children) {
-            child.redraw();
+            const intersection = region.intersection(child.bounds);
+            if (intersection !== undefined) {
+                child.draw(new Rect(
+                    intersection.x - child.bounds.x,
+                    intersection.y - child.bounds.y,
+                    intersection.width,
+                    intersection.height));
+            }
         }
     }
 
-    protected clear() {
-        for (let y = 0; y < this._bounds.height; y++) {
-            for (let x = 0; x < this._bounds.width; x++) {
-                this.moveTo(x, y);
-                this._screen.setCharacter(' ');
-            }
+    public invalidate(region?: Rect) {
+        if (region === undefined) {
+            region = new Rect(0, 0, this.bounds.width, this.bounds.height);
         }
 
-        this.moveTo(0, 0);
+        if (this.parent === undefined) {
+            this.draw(region);
+            return;
+        }
+
+        const parentRegion = new Rect(
+            region.x + this.bounds.x,
+            region.y + this.bounds.y,
+            region.width,
+            region.height);
+        this.parent.invalidate(parentRegion);
+    }
+
+    public click() {
+        this.background = (this.background + 1) % 16;
+        this.invalidate();
     }
 
     protected moveTo(x: number, y: number) {
