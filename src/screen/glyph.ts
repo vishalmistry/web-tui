@@ -110,7 +110,7 @@ export class Glyph {
             try {
                 handler(property);
             } catch (err) {
-                console.log('Event handler threw error', err);
+                console.error('Event handler threw error', err);
             }
         }
     }

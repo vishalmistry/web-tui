@@ -146,12 +146,14 @@ export class Screen {
         }
     }
 
-    public moveTo(position: Point): void;
+    public moveTo(position: Point | [number, number]): void;
     public moveTo(x: number, y: number): void;
-    moveTo(a: Point | number, b?: number) {
+    moveTo(a: Point | [number, number] | number, b?: number) {
         let newCursorLocation: Point;
         if (isCoord(a)) {
             newCursorLocation = a;
+        } else if (typeof a === 'object') {
+            newCursorLocation = { x: a[0], y: a[1] };
         } else if (typeof a === 'number' && typeof b === 'number') {
             newCursorLocation = { x: a, y: b };
         } else {
@@ -402,7 +404,7 @@ export class Screen {
             try {
                 handler(arg);
             } catch (err) {
-                console.log(`Event handler failed: `, err);
+                console.error(`Event handler failed: `, err);
             }
         }
     }

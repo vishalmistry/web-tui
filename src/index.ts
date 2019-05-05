@@ -1,5 +1,6 @@
-import { View } from './gui';
+import { View, Rect } from './gui';
 import { Screen } from './screen/screen';
+import { Application } from './gui/application';
 
 const app = document.getElementById('app') as HTMLDivElement;
 const canvas = document.createElement('canvas');
@@ -13,16 +14,26 @@ screen.isMouseEnabled = true;
 screen.isKeyboardEnabled = true;
 screen.isCursorVisible = true;
 
-const v3 = new View(screen, { x: 2, y: 2, width: 2, height: 2 });
+const v3 = new View(screen, new Rect(2, 2, 3, 2));
 v3.background = 4;
 
-const v2 = new View(screen, { x: 2, y: 3, width: 5, height: 5 });
+const v3_1 = new View(screen, new Rect(1, 0, 2, 1));
+v3_1.background = 6;
+
+const v3_2 = new View(screen, new Rect(2, 0, 2, 3));
+v3_2.background = 0;
+
+const v2 = new View(screen, new Rect(2, 3, 5, 5));
 v2.background = 3;
 v2.addChild(v3);
+v2.addChild(v3_1);
+v2.addChild(v3_2);
 
-const v1 = new View(screen, { x: 4, y: 2, width: 10, height: 10 });
+const v1 = new View(screen, new Rect(2, 2, 10, 10));
 v1.addChild(v2);
-v1.redraw();
+
+const application = new Application(screen, v1);
+application.start();
 
 // screen.print('DMKC');
 

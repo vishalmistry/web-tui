@@ -1,31 +1,46 @@
-import { Point, Rect } from '.';
+import { Rect } from '.';
 import { Screen } from '../screen';
 
 export class View {
-    protected parent?: View;
-    private children: View[] = [];
+    private static index = 0;
+    protected _parent?: View;
+    private _children: View[] = [];
 
     public background = 7;
+    public index = View.index++;
 
-    constructor(private screen: Screen, private bounds: Rect) {
+    constructor(private _screen: Screen, private _bounds: Rect) {
+    }
+
+    public get parent(): View | undefined {
+        return this._parent;
+    }
+
+    public get children(): ReadonlyArray<View> {
+        return this._children;
+    }
+
+    public get bounds(): Rect {
+        return this._bounds;
     }
 
     public addChild(view: View) {
-        this.children.push(view);
-        view.parent = this;
+        this._children.push(view);
+        view._parent = this;
     }
 
     public redraw() {
-        this.screen.background = this.background;
-        this.screen.foreground = 15;
-        for (let y = 0; y < this.bounds.height; y++) {
-            for (let x = 0; x < this.bounds.width; x++) {
+        this._screen.background = this.background;
+        this._screen.foreground = 15;
+        for (let y = 0; y < this._bounds.height; y++) {
+            for (let x = 0; x < this._bounds.width; x++) {
                 this.moveTo(x, y);
                 this.setCharacter(176);
             }
         }
 
         this.moveTo(0, 0);
+        this.setCharacter(`${this.index}`);
 
         for (const child of this.children) {
             child.redraw();
@@ -33,10 +48,10 @@ export class View {
     }
 
     protected clear() {
-        for (let y = 0; y < this.bounds.height; y++) {
-            for (let x = 0; x < this.bounds.width; x++) {
+        for (let y = 0; y < this._bounds.height; y++) {
+            for (let x = 0; x < this._bounds.width; x++) {
                 this.moveTo(x, y);
-                this.screen.setCharacter(' ');
+                this._screen.setCharacter(' ');
             }
         }
 
@@ -44,24 +59,23 @@ export class View {
     }
 
     protected moveTo(x: number, y: number) {
-        const [ax, ay] = this.viewToScreen(x, y);
-        this.screen.moveTo(ax, ay);
+        this._screen.moveTo(this.viewToScreen(x, y));
     }
 
     protected print(str: string) {
-        this.screen.print(str);
+        this._screen.print(str);
     }
 
     protected setCharacter(char: string | number) {
-        this.screen.setCharacter(char);
+        this._screen.setCharacter(char);
     }
 
-    protected viewToScreen(x: number, y: number): Point {
-        if (this.parent === undefined) {
-            return [this.bounds.x + x, this.bounds.y + y];
+    protected viewToScreen(x: number, y: number): [number, number] {
+        if (this._parent === undefined) {
+            return [this._bounds.x + x, this._bounds.y + y];
         }
 
-        const [px, py] = this.parent.viewToScreen(this.bounds.x, this.bounds.y);
+        const [px, py] = this._parent.viewToScreen(this._bounds.x, this._bounds.y);
         return [px + x,  py + y];
     }
 }
