@@ -2,14 +2,12 @@ import { Rect } from '.';
 import { Screen } from '../screen';
 
 export class View {
-    private static index = 0;
-    protected _parent?: View;
+    private _parent?: View;
     private _children: View[] = [];
 
-    public background = 7;
-    public index = View.index++;
+    public redraw?: (region: Rect) => void;
 
-    constructor(private _screen: Screen, private _bounds: Rect) {
+    constructor(private _bounds: Rect) {
     }
 
     public get parent(): View | undefined {
@@ -27,32 +25,31 @@ export class View {
     public addChild(view: View) {
         this._children.push(view);
         view._parent = this;
+
+        this.invalidate(view.bounds);
     }
 
-    public draw(region?: Rect) {
+    public remove(view: View) {
+        const index = this._children.indexOf(view);
+        if (index < 0) {
+            return;
+        }
+
+        this._children.splice(index, 1);
+        view._parent = undefined;
+
+        this.invalidate(view.bounds);
+    }
+
+    public draw(screen: Screen, region?: Rect) {
         if (region === undefined) {
             region = new Rect(0, 0, this.bounds.width, this.bounds.height);
-        }
-
-        console.log(`DRAW ${this.index} [${region.left}, ${region.top}, ${region.right}, ${region.bottom}]`);
-
-        this._screen.background = this.background;
-        this._screen.foreground = 15;
-        for (let y = region.top; y <= region.bottom; y++) {
-            for (let x = region.left; x <= region.right; x++) {
-                this.moveTo(x, y);
-                this.setCharacter(' ');
-            }
-        }
-        if (region.contains(0, 0)) {
-            this.moveTo(0, 0);
-            this.setCharacter(`${this.index}`);
         }
 
         for (const child of this.children) {
             const intersection = region.intersection(child.bounds);
             if (intersection !== undefined) {
-                child.draw(new Rect(
+                child.draw(screen, new Rect(
                     intersection.x - child.bounds.x,
                     intersection.y - child.bounds.y,
                     intersection.width,
@@ -61,13 +58,15 @@ export class View {
         }
     }
 
-    public invalidate(region?: Rect) {
+    protected invalidate(region?: Rect) {
         if (region === undefined) {
             region = new Rect(0, 0, this.bounds.width, this.bounds.height);
         }
 
         if (this.parent === undefined) {
-            this.draw(region);
+            if (this.redraw !== undefined) {
+                this.redraw(region);
+            }
             return;
         }
 
@@ -79,29 +78,12 @@ export class View {
         this.parent.invalidate(parentRegion);
     }
 
-    public click() {
-        this.background = (this.background + 1) % 16;
-        this.invalidate();
-    }
-
-    protected moveTo(x: number, y: number) {
-        this._screen.moveTo(this.viewToScreen(x, y));
-    }
-
-    protected print(str: string) {
-        this._screen.print(str);
-    }
-
-    protected setCharacter(char: string | number) {
-        this._screen.setCharacter(char);
-    }
-
-    protected viewToScreen(x: number, y: number): [number, number] {
+    protected getAbsLocation(x: number, y: number): [number, number] {
         if (this._parent === undefined) {
             return [this._bounds.x + x, this._bounds.y + y];
         }
 
-        const [px, py] = this._parent.viewToScreen(this._bounds.x, this._bounds.y);
+        const [px, py] = this._parent.getAbsLocation(this._bounds.x, this._bounds.y);
         return [px + x,  py + y];
     }
 }

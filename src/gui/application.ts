@@ -15,7 +15,8 @@ export class Application {
     }
 
     public start() {
-        this.mainView.draw();
+        this.mainView.draw(this.screen);
+        this.mainView.redraw = (region) => this.mainView.draw(this.screen, region);
 
         this.screen.addEventHandler('mousemove', this.onMouseMove);
         this.screen.addEventHandler('mousedown', this.onMouseDown);
