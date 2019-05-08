@@ -1,6 +1,7 @@
 import { View, Rect } from './gui';
 import { Screen } from './screen/screen';
 import { Application } from './gui/application';
+import { Border } from './gui/views/border';
 
 const app = document.getElementById('app') as HTMLDivElement;
 const canvas = document.createElement('canvas');
@@ -14,29 +15,25 @@ screen.isMouseEnabled = true;
 screen.isKeyboardEnabled = true;
 screen.isCursorVisible = true;
 
-const v3 = new View(screen, new Rect(2, 2, 3, 2));
-v3.background = 4;
+const mainView = new View(new Rect(0, 0, screen.columns, screen.rows));
 
-const v3_1 = new View(screen, new Rect(1, 0, 2, 1));
-v3_1.background = 6;
+const border1 = new Border(new Rect(2, 2, 10, 10));
+border1.background = 7;
+mainView.addChild(border1);
 
-const v3_2 = new View(screen, new Rect(2, 0, 2, 3));
-v3_2.background = 0;
+const border2 = new Border(new Rect(7, 7, 10, 10));
+border2.background = 1;
+mainView.addChild(border2);
 
-const v3_3 = new View(screen, new Rect(1, 1, 4, 1));
-v3_3.background = 10;
+const innerBorder = new Border(new Rect(2, 2, 6, 6));
+innerBorder.background = 4;
+border2.addChild(innerBorder);
 
-const v2 = new View(screen, new Rect(2, 3, 5, 5));
-v2.background = 3;
-v2.addChild(v3);
-v2.addChild(v3_3);
-v2.addChild(v3_2);
-v2.addChild(v3_1);
+const separateBorder = new Border(new Rect(13, 2, 2, 2));
+separateBorder.background = 3;
+mainView.addChild(separateBorder);
 
-const v1 = new View(screen, new Rect(2, 2, 10, 10));
-v1.addChild(v2);
-
-const application = new Application(screen, v1);
+const application = new Application(screen, mainView);
 application.start();
 
 // screen.print('DMKC');

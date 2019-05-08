@@ -4,6 +4,8 @@ import { Screen } from '../screen';
 export class View {
     private _parent?: View;
     private _children: View[] = [];
+    private _hasFocus = false;
+    private _focusedChild?: View = undefined;
 
     public redraw?: (region: Rect) => void;
 
@@ -18,8 +20,32 @@ export class View {
         return this._children;
     }
 
+    public get focusedView(): View | undefined {
+        return this.hasFocus ? this : this._focusedChild;
+    }
+
     public get bounds(): Rect {
         return this._bounds;
+    }
+
+    public get hasFocus(): boolean {
+        return this._hasFocus;
+    }
+
+    public set hasFocus(value: boolean) {
+        if (this._hasFocus === value) {
+            return;
+        }
+
+        this._hasFocus = value;
+        this.invalidate();
+
+        if (value) {
+            this.clearCurrentFocus();
+        }
+        if (this.parent !== undefined) {
+            this.parent.setFocusedChild(value ? this : undefined);
+        }
     }
 
     public addChild(view: View) {
@@ -29,7 +55,7 @@ export class View {
         this.invalidate(view.bounds);
     }
 
-    public remove(view: View) {
+    public removeChild(view: View) {
         const index = this._children.indexOf(view);
         if (index < 0) {
             return;
@@ -38,6 +64,9 @@ export class View {
         this._children.splice(index, 1);
         view._parent = undefined;
 
+        if (view.hasFocus || view._focusedChild !== undefined) {
+            this.setFocusedChild(undefined);
+        }
         this.invalidate(view.bounds);
     }
 
@@ -79,11 +108,30 @@ export class View {
     }
 
     protected getAbsLocation(x: number, y: number): [number, number] {
-        if (this._parent === undefined) {
+        if (this.parent === undefined) {
             return [this._bounds.x + x, this._bounds.y + y];
         }
 
-        const [px, py] = this._parent.getAbsLocation(this._bounds.x, this._bounds.y);
+        const [px, py] = this.parent.getAbsLocation(this._bounds.x, this._bounds.y);
         return [px + x,  py + y];
+    }
+
+    private setFocusedChild(value: View | undefined) {
+        let v: View | undefined = this;
+        while (v !== undefined) {
+            v._focusedChild = value;
+            v = v.parent;
+        }
+    }
+
+    private clearCurrentFocus() {
+        let v: View | undefined = this;
+        while (v !== undefined && v._focusedChild === undefined) {
+            v = v.parent;
+        }
+
+        if (v !== undefined && v._focusedChild !== undefined) {
+            v._focusedChild.hasFocus = false;
+        }
     }
 }

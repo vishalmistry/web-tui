@@ -20,6 +20,27 @@ export interface GUIMouseEvent extends GUIInputEvent<GUIMouseEventType> {
     readonly buttons: number;
 }
 
+export interface OnKeyDown {
+    keyDown(event: GUIKeyboardEvent): void;
+}
+export function hasKeyDownHandler<T>(object: T): object is T & OnKeyDown {
+    return typeof (object as any).keyDown === 'function';
+}
+
+export interface OnKeyUp {
+    keyUp(event: GUIKeyboardEvent): void;
+}
+export function hasKeyUpHandler<T>(object: T): object is T & OnKeyUp {
+    return typeof (object as any).keyUp === 'function';
+}
+
+export interface OnKeyPress {
+    keyPress(event: GUIKeyboardEvent): void;
+}
+export function hasKeyPressHandler<T>(object: T): object is T & OnKeyPress {
+    return typeof (object as any).keyPress === 'function';
+}
+
 export interface OnMouseMove {
     mouseMove(event: GUIMouseEvent): void;
 }
