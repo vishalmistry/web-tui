@@ -37,12 +37,13 @@ export class View {
             return;
         }
 
-        this._hasFocus = value;
-        this.invalidate();
-
         if (value) {
             this.clearCurrentFocus();
         }
+
+        this._hasFocus = value;
+        this.invalidate();
+
         if (this.parent !== undefined) {
             this.parent.setFocusedChild(value ? this : undefined);
         }
@@ -51,6 +52,11 @@ export class View {
     public addChild(view: View) {
         this._children.push(view);
         view._parent = this;
+
+        if (view.hasFocus) {
+            this.clearCurrentFocus();
+            this.setFocusedChild(view);
+        }
 
         this.invalidate(view.bounds);
     }
@@ -125,13 +131,14 @@ export class View {
     }
 
     private clearCurrentFocus() {
-        let v: View | undefined = this;
-        while (v !== undefined && v._focusedChild === undefined) {
+        let v: View = this;
+        while (v.parent !== undefined && v._focusedChild === undefined) {
             v = v.parent;
         }
 
-        if (v !== undefined && v._focusedChild !== undefined) {
-            v._focusedChild.hasFocus = false;
+        const focused = v._focusedChild || v;
+        if (focused !== undefined) {
+            focused.hasFocus = false;
         }
     }
 }
