@@ -20,7 +20,16 @@ export class Application {
 
     public start() {
         this.mainView.draw(this.screen);
-        this.mainView.redraw = (region) => this.mainView.draw(this.screen, region);
+        if (this.mainView.focusedView !== undefined) {
+            this.mainView.focusedView.positionCursor(this.screen);
+        }
+
+        this.mainView.redraw = (region) => {
+            this.mainView.draw(this.screen, region);
+            if (this.mainView.focusedView !== undefined) {
+                this.mainView.focusedView.positionCursor(this.screen);
+            }
+        };
 
         this.screen.addEventHandler('keydown', this.onKeyDown);
         this.screen.addEventHandler('keyup', this.onKeyUp);

@@ -42,11 +42,11 @@ export class View {
         }
 
         this._hasFocus = value;
-        this.invalidate();
-
         if (this.parent !== undefined) {
             this.parent.setFocusedChild(value ? this : undefined);
         }
+
+        this.invalidate();
     }
 
     public addChild(view: View) {
@@ -91,6 +91,10 @@ export class View {
                     intersection.height));
             }
         }
+    }
+
+    public positionCursor(screen: Screen) {
+        screen.moveTo(this.getAbsLocation(0, 0));
     }
 
     protected invalidate(region?: Rect) {
