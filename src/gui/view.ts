@@ -1,5 +1,4 @@
-import { Rect } from '.';
-import { Screen } from '../screen';
+import { Rect, ScreenContext } from '.';
 
 export class View {
     private _parent?: View;
@@ -76,7 +75,7 @@ export class View {
         this.invalidate(view.bounds);
     }
 
-    public draw(screen: Screen, region?: Rect) {
+    public draw(screen: ScreenContext, region?: Rect) {
         if (region === undefined) {
             region = new Rect(0, 0, this.bounds.width, this.bounds.height);
         }
@@ -84,17 +83,22 @@ export class View {
         for (const child of this.children) {
             const intersection = region.intersection(child.bounds);
             if (intersection !== undefined) {
-                child.draw(screen, new Rect(
+                const childRedrawRegion = new Rect(
                     intersection.x - child.bounds.x,
                     intersection.y - child.bounds.y,
                     intersection.width,
-                    intersection.height));
+                    intersection.height);
+
+                const childScreenContext = screen.createForSubregion(child.bounds);
+                childScreenContext.setClip(childRedrawRegion);
+
+                child.draw(childScreenContext, childRedrawRegion);
             }
         }
     }
 
-    public positionCursor(screen: Screen) {
-        screen.moveTo(this.getAbsLocation(0, 0));
+    public positionCursor(screen: ScreenContext) {
+        screen.moveTo(0, 0);
     }
 
     protected invalidate(region?: Rect) {
@@ -115,15 +119,6 @@ export class View {
             region.width,
             region.height);
         this.parent.invalidate(parentRegion);
-    }
-
-    protected getAbsLocation(x: number, y: number): [number, number] {
-        if (this.parent === undefined) {
-            return [this._bounds.x + x, this._bounds.y + y];
-        }
-
-        const [px, py] = this.parent.getAbsLocation(this._bounds.x, this._bounds.y);
-        return [px + x,  py + y];
     }
 
     private setFocusedChild(value: View | undefined) {

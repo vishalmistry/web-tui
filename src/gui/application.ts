@@ -9,6 +9,8 @@ import {
     hasMouseDownHandler,
     hasMouseMoveHandler,
     hasMouseUpHandler,
+    Rect,
+    ScreenContext,
     View,
 } from '.';
 import { Screen, ScreenKeyboardEvent, ScreenMouseEvent } from '../screen';
@@ -19,17 +21,8 @@ export class Application {
     }
 
     public start() {
-        this.mainView.draw(this.screen);
-        if (this.mainView.focusedView !== undefined) {
-            this.mainView.focusedView.positionCursor(this.screen);
-        }
-
-        this.mainView.redraw = (region) => {
-            this.mainView.draw(this.screen, region);
-            if (this.mainView.focusedView !== undefined) {
-                this.mainView.focusedView.positionCursor(this.screen);
-            }
-        };
+        this.refresh();
+        this.mainView.redraw = this.refresh;
 
         this.screen.addEventHandler('keydown', this.onKeyDown);
         this.screen.addEventHandler('keyup', this.onKeyUp);
@@ -50,6 +43,17 @@ export class Application {
         this.screen.removeEventHandler('mouseup', this.onMouseUp);
         this.screen.removeEventHandler('click', this.onMouseClick);
         this.screen.removeEventHandler('dblclick', this.onMouseDoubleClick);
+    }
+
+    private refresh = (region?: Rect) => {
+        const refreshContext = new ScreenContext(this.screen, this.mainView);
+        refreshContext.setClip(region);
+        this.mainView.draw(refreshContext, region);
+
+        if (this.mainView.focusedView !== undefined) {
+            this.mainView.focusedView.positionCursor(
+                new ScreenContext(this.screen, this.mainView.focusedView));
+        }
     }
 
     onKeyDown = (event: ScreenKeyboardEvent) => this.fireKeyboardEvent(event, hasKeyDownHandler, (v, args) => v.keyDown(args));
