@@ -58,12 +58,18 @@ export class ScreenContext {
     }
 
     public print(str: string) {
-        const x = this.screen.cursorLocation.x;
-        const y = this.screen.cursorLocation.y;
-        for (let i = 0; i < str.length; i++) {
-            this.screen.moveTo(x + i, y);
-            this.setCharacter(str[i]);
+        const strRect = new Rect(
+            this.screen.cursorLocation.x,
+            this.screen.cursorLocation.y,
+            str.length,
+            1);
+        const intersection = strRect.intersection(this.clip);
+        if (intersection === undefined) {
+            return;
         }
+
+        this.screen.moveTo(intersection.x, intersection.y);
+        this.screen.print(str.substr(intersection.x - this.screen.cursorLocation.x, intersection.width));
     }
 
     public setClip(region?: Rect) {
