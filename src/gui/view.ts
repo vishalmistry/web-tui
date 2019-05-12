@@ -108,7 +108,10 @@ export class View {
 
         if (this.parent === undefined) {
             if (this.redraw !== undefined) {
-                this.redraw(region);
+                const redrawRegion = region.intersection(this.bounds);
+                if (redrawRegion !== undefined) {
+                    this.redraw(redrawRegion);
+                }
             }
             return;
         }

@@ -2,41 +2,49 @@ import { Rect, View } from '.';
 import { Screen } from '../screen';
 
 export class ScreenContext {
-    private bounds: Rect;
-    private clip!: Rect;
+    private _bounds: Rect;
+    private _clip!: Rect;
+    private _cursorLocation: { x: number, y: number };
 
-    constructor(private screen: Screen, viewOrRegion: View | Rect) {
+    constructor(private _screen: Screen, viewOrRegion: View | Rect) {
         if (viewOrRegion instanceof View) {
-            this.bounds = ScreenContext.calculateViewBounds(viewOrRegion);
+            this._bounds = ScreenContext.calculateViewBounds(viewOrRegion);
         } else {
-            this.bounds = viewOrRegion;
+            this._bounds = viewOrRegion;
         }
 
+        // Put cursor initially off screen so nothing happens unless
+        // moveTo() is called first. This stops the need to check location
+        // elsewhere
+        this._cursorLocation = {
+            x: this._screen.columns,
+            y: this._screen.rows,
+        };
         this.setClip();
     }
 
     public get background(): number {
-        return this.screen.background;
+        return this._screen.background;
     }
 
     public set background(value: number) {
-        this.screen.background = value;
+        this._screen.background = value;
     }
 
     public get foreground(): number {
-        return this.screen.foreground;
+        return this._screen.foreground;
     }
 
     public set foreground(value: number) {
-        this.screen.foreground = value;
+        this._screen.foreground = value;
     }
 
     public get isCursorVisible() {
-        return this.screen.isCursorVisible;
+        return this._screen.isCursorVisible;
     }
 
     public set isCursorVisible(value: boolean) {
-        this.screen.isCursorVisible = value;
+        this._screen.isCursorVisible = value;
     }
 
     public moveTo(position: [number, number]): void;
@@ -48,62 +56,74 @@ export class ScreenContext {
             throw new Error('Bad arguments');
         }
 
-        if (x > this.bounds.right || y > this.bounds.bottom) {
+        if (x > this._bounds.right || y > this._bounds.bottom) {
             throw new Error('Position out of bounds');
         }
 
-        this.screen.moveTo(x + this.bounds.x, y + this.bounds.y);
+        this._cursorLocation = {
+            x: x + this._bounds.x,
+            y: y + this._bounds.y,
+        };
+
+        if (this.isCursorOnScreen()) {
+            this._screen.moveTo(this._cursorLocation);
+        }
     }
 
     public setCharacter(char: string | number) {
-        if (this.clip.contains(this.screen.cursorLocation.x, this.screen.cursorLocation.y)) {
-            this.screen.setCharacter(char);
+        if (this.isCursorOnScreen() && this._clip.contains(this._cursorLocation.x, this._cursorLocation.y)) {
+            this._screen.setCharacter(char);
         }
     }
 
     public print(str: string) {
         const strRect = new Rect(
-            this.screen.cursorLocation.x,
-            this.screen.cursorLocation.y,
+            this._cursorLocation.x,
+            this._cursorLocation.y,
             str.length,
             1);
-        const intersection = strRect.intersection(this.clip);
+        const intersection = strRect.intersection(this._clip);
         if (intersection === undefined) {
             return;
         }
 
-        this.screen.moveTo(intersection.x, intersection.y);
-        this.screen.print(str.substr(intersection.x - this.screen.cursorLocation.x, intersection.width));
+        this._screen.moveTo(intersection.x, intersection.y);
+        this._screen.print(str.substr(intersection.x - this._cursorLocation.x, intersection.width));
     }
 
     public setClip(region?: Rect) {
         if (region === undefined) {
-            this.clip = this.bounds;
+            this._clip = this._bounds;
             return;
         }
 
         const absoluteRect = new Rect(
-            this.bounds.x + region.x,
-            this.bounds.y + region.y,
+            this._bounds.x + region.x,
+            this._bounds.y + region.y,
             region.width,
             region.height);
 
-        const clip = absoluteRect.intersection(this.bounds);
+        const clip = absoluteRect.intersection(this._bounds);
         if (clip === undefined) {
             throw new Error('Clip region does not fall within bounds');
         }
 
-        this.clip = clip;
+        this._clip = clip;
     }
 
     public createForSubregion(rect: Rect): ScreenContext {
         const screenRegion = new Rect(
-            rect.x + this.bounds.x,
-            rect.y + this.bounds.y,
+            rect.x + this._bounds.x,
+            rect.y + this._bounds.y,
             rect.width,
             rect.height);
 
-        return new ScreenContext(this.screen, screenRegion);
+        return new ScreenContext(this._screen, screenRegion);
+    }
+
+    private isCursorOnScreen() {
+        return this._cursorLocation.x < this._screen.columns &&
+               this._cursorLocation.y < this._screen.rows;
     }
 
     private static calculateViewBounds(view: View): Rect {
