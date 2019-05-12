@@ -92,12 +92,12 @@ export class Application {
     }
 
     private static findTarget(view: View, px: number, py: number): { view: View | undefined, x: number, y: number } {
-        if (!view.bounds.contains(px, py)) {
+        if (!view.frame.contains(px, py)) {
             return { view: undefined, x: 0, y: 0 };
         }
 
-        const relativeX = px - view.bounds.x;
-        const relativeY = py - view.bounds.y;
+        const relativeX = px - view.frame.x;
+        const relativeY = py - view.frame.y;
 
         if (view.children.length > 0) {
             for (let i = view.children.length - 1; i >= 0; i--) {

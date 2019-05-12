@@ -127,15 +127,15 @@ export class ScreenContext {
     }
 
     private static calculateViewBounds(view: View): Rect {
-        let x = view.bounds.left;
-        let y = view.bounds.top;
+        let x = view.frame.left;
+        let y = view.frame.top;
         let v = view.parent;
         while (v !== undefined) {
-            x = x + v.bounds.x;
-            y = y + v.bounds.y;
+            x = x + v.frame.x;
+            y = y + v.frame.y;
             v = v.parent;
         }
 
-        return new Rect(x, y, view.bounds.width, view.bounds.height);
+        return new Rect(x, y, view.frame.width, view.frame.height);
     }
 }

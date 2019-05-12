@@ -5,10 +5,12 @@ export class View {
     private _children: View[] = [];
     private _hasFocus = false;
     private _focusedChild?: View = undefined;
+    private _bounds: Rect;
 
     public redraw?: (region: Rect) => void;
 
-    constructor(private _bounds: Rect) {
+    constructor(private _frame: Rect) {
+        this._bounds = new Rect(0, 0, _frame.width, _frame.height);
     }
 
     public get parent(): View | undefined {
@@ -21,6 +23,10 @@ export class View {
 
     public get focusedView(): View | undefined {
         return this.hasFocus ? this : this._focusedChild;
+    }
+
+    public get frame(): Rect {
+        return this._frame;
     }
 
     public get bounds(): Rect {
@@ -57,7 +63,7 @@ export class View {
             this.setFocusedChild(view);
         }
 
-        this.invalidate(view.bounds);
+        this.invalidate(view.frame);
     }
 
     public removeChild(view: View) {
@@ -72,43 +78,43 @@ export class View {
         if (view.hasFocus || view._focusedChild !== undefined) {
             this.setFocusedChild(undefined);
         }
-        this.invalidate(view.bounds);
+        this.invalidate(view.frame);
     }
 
-    public draw(screen: ScreenContext, region?: Rect) {
+    public draw(ctx: ScreenContext, region?: Rect) {
         if (region === undefined) {
-            region = new Rect(0, 0, this.bounds.width, this.bounds.height);
+            region = this.bounds;
         }
 
         for (const child of this.children) {
-            const intersection = region.intersection(child.bounds);
+            const intersection = region.intersection(child.frame);
             if (intersection !== undefined) {
                 const childRedrawRegion = new Rect(
-                    intersection.x - child.bounds.x,
-                    intersection.y - child.bounds.y,
+                    intersection.x - child.frame.x,
+                    intersection.y - child.frame.y,
                     intersection.width,
                     intersection.height);
 
-                const childScreenContext = screen.createForSubregion(child.bounds);
-                childScreenContext.setClip(childRedrawRegion);
+                const childCtx = ctx.createForSubregion(child.frame);
+                childCtx.setClip(childRedrawRegion);
 
-                child.draw(childScreenContext, childRedrawRegion);
+                child.draw(childCtx, childRedrawRegion);
             }
         }
     }
 
-    public positionCursor(screen: ScreenContext) {
-        screen.moveTo(0, 0);
+    public positionCursor(ctx: ScreenContext) {
+        ctx.moveTo(0, 0);
     }
 
     protected invalidate(region?: Rect) {
         if (region === undefined) {
-            region = new Rect(0, 0, this.bounds.width, this.bounds.height);
+            region = new Rect(0, 0, this.frame.width, this.frame.height);
         }
 
         if (this.parent === undefined) {
             if (this.redraw !== undefined) {
-                const redrawRegion = region.intersection(this.bounds);
+                const redrawRegion = region.intersection(this.frame);
                 if (redrawRegion !== undefined) {
                     this.redraw(redrawRegion);
                 }
@@ -117,8 +123,8 @@ export class View {
         }
 
         const parentRegion = new Rect(
-            region.x + this.bounds.x,
-            region.y + this.bounds.y,
+            region.x + this.frame.x,
+            region.y + this.frame.y,
             region.width,
             region.height);
         this.parent.invalidate(parentRegion);
