@@ -180,7 +180,7 @@ export class Screen {
             throw new Error('Bad arguments');
         }
 
-        if (newCursorLocation.x < 0 || newCursorLocation.y >= this.columns) {
+        if (newCursorLocation.x < 0 || newCursorLocation.x >= this.columns) {
             throw new Error('Invalid column');
         }
         if (newCursorLocation.y < 0 || newCursorLocation.y >= this.rows) {

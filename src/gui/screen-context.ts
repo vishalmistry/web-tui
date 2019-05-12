@@ -3,7 +3,7 @@ import { Screen } from '../screen';
 
 export class ScreenContext {
     private bounds: Rect;
-    private clip: Rect;
+    private clip!: Rect;
 
     constructor(private screen: Screen, viewOrRegion: View | Rect) {
         if (viewOrRegion instanceof View) {
@@ -12,7 +12,7 @@ export class ScreenContext {
             this.bounds = viewOrRegion;
         }
 
-        this.clip = this.bounds;
+        this.setClip();
     }
 
     public get background(): number {
