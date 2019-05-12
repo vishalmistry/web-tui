@@ -1,23 +1,20 @@
-import { View, Rect } from './gui';
-import { Screen } from './screen/screen';
+import { Rect } from './gui';
 import { Application } from './gui/application';
 import { Border } from './gui/views/border';
+import { Screen } from './screen/screen';
 
 const app = document.getElementById('app') as HTMLDivElement;
-const canvas = document.createElement('canvas');
-app.appendChild(canvas);
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
 
 // tslint:disable-next-line: no-unused-expression
-const screen = new Screen(canvas);
+const screen = new Screen(app);
 screen.isMouseEnabled = true;
 screen.isKeyboardEnabled = true;
 screen.isCursorVisible = true;
 
-const mainView = new View(new Rect(0, 0, screen.columns, screen.rows));
+const mainView = new Border(new Rect(0, 0, screen.columns, screen.rows));
+mainView.background = 0;
 
-const border1 = new Border(new Rect(2, 2, 10, 10));
+const border1 = new Border(new Rect(2, 2, 10, 10), mainView);
 border1.background = 7;
 mainView.addChild(border1);
 
@@ -27,10 +24,12 @@ mainView.addChild(border2);
 
 const innerBorder = new Border(new Rect(2, 2, 6, 6));
 innerBorder.background = 4;
+innerBorder.hasFocus = true;
 border2.addChild(innerBorder);
 
 const separateBorder = new Border(new Rect(13, 2, 2, 2));
 separateBorder.background = 3;
+separateBorder.hasFocus = true;
 mainView.addChild(separateBorder);
 
 const application = new Application(screen, mainView);
