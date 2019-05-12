@@ -9,6 +9,11 @@ function isPoint(object: any): object is Point {
     return typeof object.x === 'number' && typeof object.y === 'number';
 }
 
+interface Size {
+    readonly width: number;
+    readonly height: number;
+}
+
 export type EventHandler<TArg> = (event: TArg) => void;
 export type ScreenKeyboardEventType = 'keyup' | 'keydown' | 'keypress';
 export type ScreenMouseEventType = 'mousemove' | 'mousedown' | 'mouseup' | 'click' | 'dblclick';
@@ -65,8 +70,8 @@ export class Screen {
                             { [key in ScreenKeyboardEventType]?: Array<EventHandler<ScreenKeyboardEvent>>; } &
                             { resize?: Array<EventHandler<void>> } = {};
 
-    constructor(private _container: HTMLElement) {
-        const canvas = Screen.createCanvas(_container);
+    constructor(private _container: HTMLElement, dimensions?: Size) {
+        const canvas = this.createCanvas(_container, dimensions);
         const context = canvas.getContext('2d');
         if (context === null) {
             throw new Error('Unable to get canvas 2D context');
@@ -299,6 +304,18 @@ export class Screen {
         this.fireMouseEvent(event, 'mousemove');
     }
 
+    private onWindowResize = (_event: UIEvent) => {
+        const containerRect = this._container.getBoundingClientRect();
+        if (containerRect.width === this._canvas.width &&
+            containerRect.height === this._canvas.height) {
+            return;
+        }
+
+        this._canvas.width = containerRect.width;
+        this._canvas.height = containerRect.height;
+        this.refresh();
+    }
+
     private onCanvasKeyDown = (event: KeyboardEvent) => this.fireKeyboardEvent(event, 'keydown');
     private onCanvasKeyUp = (event: KeyboardEvent) => this.fireKeyboardEvent(event, 'keyup');
     private onCanvasKeyPress = (event: KeyboardEvent) => this.fireKeyboardEvent(event, 'keypress');
@@ -415,8 +432,8 @@ export class Screen {
 
     private refresh() {
         const canvas = this._context.canvas;
-        const newColumns = Math.floor(canvas.width / this._glyphWidth);
-        const newRows = Math.floor(canvas.height / this._glyphHeight);
+        const newColumns = Math.max(Math.floor(canvas.width / this._glyphWidth), 1);
+        const newRows = Math.max(Math.floor(canvas.height / this._glyphHeight), 1);
 
         if (this._columns === newColumns && this._rows === newRows) {
             this.render(0, 0, this._columns, this._rows);
@@ -476,16 +493,20 @@ export class Screen {
         Screen.fireHandlers(this._eventHandlers.resize, undefined);
     }
 
-    private onWindowResize = (_event: UIEvent) => {
-        const containerRect = this._container.getBoundingClientRect();
-        if (containerRect.width === this._canvas.width &&
-            containerRect.height === this._canvas.height) {
-            return;
+    private createCanvas(container: HTMLElement, dimensions?: Size) {
+        const canvas = document.createElement('canvas');
+
+        if (dimensions !== undefined) {
+            canvas.width = dimensions.width * this._glyphWidth;
+            canvas.height = dimensions.height * this._glyphHeight;
+        } else {
+            const containerRect = container.getBoundingClientRect();
+            canvas.width = containerRect.width;
+            canvas.height = containerRect.height;
         }
 
-        this._canvas.width = containerRect.width;
-        this._canvas.height = containerRect.height;
-        this.refresh();
+        container.appendChild(canvas);
+        return canvas;
     }
 
     private static fireHandlers<TArg>(handlers: Array<(e: TArg) => void> | undefined, arg: TArg) {
@@ -500,14 +521,5 @@ export class Screen {
                 console.error(`Event handler failed: `, err);
             }
         }
-    }
-
-    private static createCanvas(container: HTMLElement) {
-        const containerRect = container.getBoundingClientRect();
-        const canvas = document.createElement('canvas');
-        canvas.width = containerRect.width;
-        canvas.height = containerRect.height;
-        container.appendChild(canvas);
-        return canvas;
     }
 }

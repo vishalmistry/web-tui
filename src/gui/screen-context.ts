@@ -48,6 +48,10 @@ export class ScreenContext {
             throw new Error('Bad arguments');
         }
 
+        if (x > this.bounds.right || y > this.bounds.bottom) {
+            throw new Error('Position out of bounds');
+        }
+
         this.screen.moveTo(x + this.bounds.x, y + this.bounds.y);
     }
 
