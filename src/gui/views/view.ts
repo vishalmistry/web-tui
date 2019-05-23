@@ -1,4 +1,4 @@
-import { Rect, ScreenContext } from '.';
+import { Rect, ScreenContext } from '..';
 
 export class View {
     private _parent?: View;

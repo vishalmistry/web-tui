@@ -6,7 +6,7 @@ import { Screen } from './screen/screen';
 const app = document.getElementById('app') as HTMLDivElement;
 
 // tslint:disable-next-line: no-unused-expression
-const screen = new Screen(app);
+const screen = new Screen(app, {width: 80, height: 25});
 screen.isMouseEnabled = true;
 screen.isKeyboardEnabled = true;
 screen.isCursorVisible = true;
@@ -18,11 +18,11 @@ const border1 = new Border(new Rect(2, 2, 10, 10), mainView);
 border1.background = 7;
 mainView.addChild(border1);
 
-const border2 = new Border(new Rect(7, 7, 10, 10));
+const border2 = new Border(new Rect(69, 7, 10, 10));
 border2.background = 1;
 mainView.addChild(border2);
 
-const innerBorder = new Border(new Rect(2, 2, 6, 6));
+const innerBorder = new Border(new Rect(5, 5, 7, 7));
 innerBorder.background = 4;
 innerBorder.hasFocus = true;
 border2.addChild(innerBorder);
