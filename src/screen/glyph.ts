@@ -1,10 +1,11 @@
 import { Palette } from '.';
+import { EventEmitter } from '../common';
 
-export type GlyphEvents = 'changed';
 export type GlyphProperty = 'code' | 'background' | 'foreground';
-export type GlyphPropertyChangedEventHandler = (property: GlyphProperty) => void;
 
 export class Glyph {
+    public readonly changed = new EventEmitter<GlyphProperty>();
+
     // tslint:disable-next-line: max-line-length
     private static readonly CHARACTERS = ' ☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■ ';
     // tslint:disable-next-line: max-line-length
@@ -17,7 +18,6 @@ export class Glyph {
     private _code = 32;
     private _foreground = 0;
     private _background = 0;
-    private _eventHandlers = new Array<GlyphPropertyChangedEventHandler>();
 
     public get code() {
         return this._code;
@@ -26,7 +26,7 @@ export class Glyph {
     public set code(code: number) {
         if (this._code !== code) {
             this._code = code;
-            this.fireChangedEvent('code');
+            this.changed.emit('code');
         }
     }
 
@@ -52,7 +52,7 @@ export class Glyph {
     public set foreground(color: number) {
         if (this._foreground !== color) {
             this._foreground = color;
-            this.fireChangedEvent('foreground');
+            this.changed.emit('foreground');
         }
     }
 
@@ -63,7 +63,7 @@ export class Glyph {
     public set background(color: number) {
         if (this._background !== color) {
             this._background = color;
-            this.fireChangedEvent('background');
+            this.changed.emit('background');
         }
     }
 
@@ -90,29 +90,6 @@ export class Glyph {
                 }
             }
         });
-    }
-
-    public addEventHandler(_event: GlyphEvents, handler: GlyphPropertyChangedEventHandler) {
-        if (this._eventHandlers.indexOf(handler) < 0) {
-            this._eventHandlers.push(handler);
-        }
-    }
-
-    public removeEventHandler(_event: GlyphEvents, handler: GlyphPropertyChangedEventHandler) {
-        const index = this._eventHandlers.indexOf(handler);
-        if (index >= 0) {
-            this._eventHandlers.splice(index, 1);
-        }
-    }
-
-    private fireChangedEvent(property: GlyphProperty) {
-        for (const handler of this._eventHandlers) {
-            try {
-                handler(property);
-            } catch (err) {
-                console.error('Event handler threw error', err);
-            }
-        }
     }
 
     private static loadSpriteSheetImage(): Promise<HTMLImageElement> {

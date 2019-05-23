@@ -2,7 +2,7 @@ import { ScreenContext } from '..';
 import { EventEmitter, Rect } from '../../common';
 
 export class View {
-    public invalidated = new EventEmitter<Rect>();
+    public readonly invalidated = new EventEmitter<Rect>();
 
     private _parent?: View;
     private _children: View[] = [];

@@ -21,57 +21,57 @@ export interface GUIMouseEvent extends GUIInputEvent<GUIMouseEventType> {
 }
 
 export interface OnKeyDown {
-    keyDown(event: GUIKeyboardEvent): void;
+    onKeyDown(event: GUIKeyboardEvent): void;
 }
 export function hasKeyDownHandler<T>(object: T): object is T & OnKeyDown {
-    return typeof (object as any).keyDown === 'function';
+    return typeof (object as any).onKeyDown === 'function';
 }
 
 export interface OnKeyUp {
-    keyUp(event: GUIKeyboardEvent): void;
+    onKeyUp(event: GUIKeyboardEvent): void;
 }
 export function hasKeyUpHandler<T>(object: T): object is T & OnKeyUp {
-    return typeof (object as any).keyUp === 'function';
+    return typeof (object as any).onKeyUp === 'function';
 }
 
 export interface OnKeyPress {
-    keyPress(event: GUIKeyboardEvent): void;
+    onKeyPress(event: GUIKeyboardEvent): void;
 }
 export function hasKeyPressHandler<T>(object: T): object is T & OnKeyPress {
-    return typeof (object as any).keyPress === 'function';
+    return typeof (object as any).onKeyPress === 'function';
 }
 
 export interface OnMouseMove {
-    mouseMove(event: GUIMouseEvent): void;
+    onMouseMove(event: GUIMouseEvent): void;
 }
 export function hasMouseMoveHandler<T>(object: T): object is T & OnMouseMove {
-    return typeof (object as any).mouseMove === 'function';
+    return typeof (object as any).onMouseMove === 'function';
 }
 
 export interface OnMouseDown {
-    mouseDown(event: GUIMouseEvent): void;
+    onMouseDown(event: GUIMouseEvent): void;
 }
 export function hasMouseDownHandler<T>(object: T): object is T & OnMouseDown {
-    return typeof (object as any).mouseDown === 'function';
+    return typeof (object as any).onMouseDown === 'function';
 }
 
 export interface OnMouseUp {
-    mouseUp(event: GUIMouseEvent): void;
+    onMouseUp(event: GUIMouseEvent): void;
 }
 export function hasMouseUpHandler<T>(object: T): object is T & OnMouseUp {
-    return typeof (object as any).mouseUp === 'function';
+    return typeof (object as any).onMouseUp === 'function';
 }
 
 export interface OnClick {
-    click(event: GUIMouseEvent): void;
+    onClick(event: GUIMouseEvent): void;
 }
 export function hasClickHandler<T>(object: T): object is T & OnClick {
-    return typeof (object as any).click === 'function';
+    return typeof (object as any).onClick === 'function';
 }
 
 export interface OnDoubleClick {
-    doubleClick(event: GUIMouseEvent): void;
+    onDoubleClick(event: GUIMouseEvent): void;
 }
 export function hasDoubleClickHandler<T>(object: T): object is T & OnDoubleClick {
-    return typeof (object as any).doubleClick === 'function';
+    return typeof (object as any).onDoubleClick === 'function';
 }

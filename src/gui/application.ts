@@ -21,33 +21,33 @@ export class Application {
     }
 
     public start() {
-        this.refresh();
-        this.mainView.invalidated.subscribe(this.refresh);
+        this.redrawInvalidatedRegion();
+        this.mainView.invalidated.subscribe(this.redrawInvalidatedRegion);
 
-        this.screen.addEventHandler('keydown', this.onKeyDown);
-        this.screen.addEventHandler('keyup', this.onKeyUp);
-        this.screen.addEventHandler('keypress', this.onKeyPress);
-        this.screen.addEventHandler('mousemove', this.onMouseMove);
-        this.screen.addEventHandler('mousedown', this.onMouseDown);
-        this.screen.addEventHandler('mouseup', this.onMouseUp);
-        this.screen.addEventHandler('click', this.onMouseClick);
-        this.screen.addEventHandler('dblclick', this.onMouseDoubleClick);
+        this.screen.keyDown.subscribe(this.onKeyDown);
+        this.screen.keyUp.subscribe(this.onKeyUp);
+        this.screen.keyPress.subscribe(this.onKeyPress);
+        this.screen.mouseMove.subscribe(this.onMouseMove);
+        this.screen.mouseDown.subscribe(this.onMouseDown);
+        this.screen.mouseUp.subscribe(this.onMouseUp);
+        this.screen.click.subscribe(this.onClick);
+        this.screen.doubleClick.subscribe(this.onDoubleClick);
     }
 
     public stop() {
-        this.mainView.invalidated.unsubscribe(this.refresh);
+        this.mainView.invalidated.unsubscribe(this.redrawInvalidatedRegion);
 
-        this.screen.removeEventHandler('keydown', this.onKeyDown);
-        this.screen.removeEventHandler('keyup', this.onKeyUp);
-        this.screen.removeEventHandler('keypress', this.onKeyPress);
-        this.screen.removeEventHandler('mousemove', this.onMouseMove);
-        this.screen.removeEventHandler('mousedown', this.onMouseDown);
-        this.screen.removeEventHandler('mouseup', this.onMouseUp);
-        this.screen.removeEventHandler('click', this.onMouseClick);
-        this.screen.removeEventHandler('dblclick', this.onMouseDoubleClick);
+        this.screen.keyDown.unsubscribe(this.onKeyDown);
+        this.screen.keyUp.unsubscribe(this.onKeyUp);
+        this.screen.keyPress.unsubscribe(this.onKeyPress);
+        this.screen.mouseMove.unsubscribe(this.onMouseMove);
+        this.screen.mouseDown.unsubscribe(this.onMouseDown);
+        this.screen.mouseUp.unsubscribe(this.onMouseUp);
+        this.screen.click.unsubscribe(this.onClick);
+        this.screen.doubleClick.unsubscribe(this.onDoubleClick);
     }
 
-    private refresh = (region?: Rect) => {
+    private redrawInvalidatedRegion = (region?: Rect) => {
         const refreshContext = new ScreenContext(this.screen, this.mainView);
         refreshContext.setClip(region);
         this.mainView.draw(refreshContext, region);
@@ -58,14 +58,29 @@ export class Application {
         }
     }
 
-    onKeyDown = (event: ScreenKeyboardEvent) => this.fireKeyboardEvent(event, hasKeyDownHandler, (v, args) => v.keyDown(args));
-    onKeyUp = (event: ScreenKeyboardEvent) => this.fireKeyboardEvent(event, hasKeyUpHandler, (v, args) => v.keyUp(args));
-    onKeyPress = (event: ScreenKeyboardEvent) => this.fireKeyboardEvent(event, hasKeyPressHandler, (v, args) => v.keyPress(args));
-    onMouseMove = (event: ScreenMouseEvent) => this.fireMouseEvent(event, hasMouseMoveHandler, (v, args) => v.mouseMove(args));
-    onMouseDown = (event: ScreenMouseEvent) => this.fireMouseEvent(event, hasMouseDownHandler, (v, args) => v.mouseDown(args));
-    onMouseUp = (event: ScreenMouseEvent) => this.fireMouseEvent(event, hasMouseUpHandler, (v, args) => v.mouseUp(args));
-    onMouseClick = (event: ScreenMouseEvent) => this.fireMouseEvent(event, hasClickHandler, (v, args) => v.click(args));
-    onMouseDoubleClick = (event: ScreenMouseEvent) => this.fireMouseEvent(event, hasDoubleClickHandler, (v, args) => v.doubleClick(args));
+    private onKeyDown = (event: ScreenKeyboardEvent) =>
+        this.fireKeyboardEvent(event, hasKeyDownHandler, (v, args) => v.onKeyDown(args))
+
+    private onKeyUp = (event: ScreenKeyboardEvent) =>
+        this.fireKeyboardEvent(event, hasKeyUpHandler, (v, args) => v.onKeyUp(args))
+
+    private onKeyPress = (event: ScreenKeyboardEvent) =>
+        this.fireKeyboardEvent(event, hasKeyPressHandler, (v, args) => v.onKeyPress(args))
+
+    private onMouseMove = (event: ScreenMouseEvent) =>
+        this.fireMouseEvent(event, hasMouseMoveHandler, (v, args) => v.onMouseMove(args))
+
+    private onMouseDown = (event: ScreenMouseEvent) =>
+        this.fireMouseEvent(event, hasMouseDownHandler, (v, args) => v.onMouseDown(args))
+
+    private onMouseUp = (event: ScreenMouseEvent) =>
+        this.fireMouseEvent(event, hasMouseUpHandler, (v, args) => v.onMouseUp(args))
+
+    private onClick = (event: ScreenMouseEvent) =>
+        this.fireMouseEvent(event, hasClickHandler, (v, args) => v.onClick(args))
+
+    private onDoubleClick = (event: ScreenMouseEvent) => 
+        this.fireMouseEvent(event, hasDoubleClickHandler, (v, args) => v.onDoubleClick(args))
 
     private fireMouseEvent<T>(event: ScreenMouseEvent,
                               guard: (view: View) => view is View & T,

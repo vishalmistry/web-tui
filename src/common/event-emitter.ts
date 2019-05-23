@@ -1,4 +1,4 @@
-type EventHandler<TArg> = (arg: TArg) => void;
+export type EventHandler<TArg> = (arg: TArg) => void;
 
 export class EventEmitter<TArg> {
     private _handlers = new Array<EventHandler<TArg>>();

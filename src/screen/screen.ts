@@ -1,4 +1,5 @@
 import { Glyph } from '.';
+import { EventEmitter } from '../common';
 import { Palette } from './palette';
 
 interface Point {
@@ -14,12 +15,10 @@ interface Size {
     readonly height: number;
 }
 
-export type EventHandler<TArg> = (event: TArg) => void;
-export type ScreenKeyboardEventType = 'keyup' | 'keydown' | 'keypress';
-export type ScreenMouseEventType = 'mousemove' | 'mousedown' | 'mouseup' | 'click' | 'dblclick';
-export type ScreenEventTypes = 'resize' | ScreenKeyboardEventType | ScreenMouseEventType;
+type ScreenKeyboardEventType = 'keyup' | 'keydown' | 'keypress';
+type ScreenMouseEventType = 'mousemove' | 'mousedown' | 'mouseup' | 'click' | 'dblclick';
 
-export interface ScreenInputEvent<T extends string> {
+interface ScreenInputEvent<T extends string> {
     readonly type: T;
     readonly shiftKey: boolean;
     readonly ctrlKey: boolean;
@@ -39,6 +38,18 @@ export interface ScreenMouseEvent extends ScreenInputEvent<ScreenMouseEventType>
 
 export class Screen {
     private static readonly CURSOR_BLINK_INTERVAL = 100;
+
+    public readonly resized = new EventEmitter<void>();
+
+    public readonly keyDown = new EventEmitter<ScreenKeyboardEvent>();
+    public readonly keyUp = new EventEmitter<ScreenKeyboardEvent>();
+    public readonly keyPress = new EventEmitter<ScreenKeyboardEvent>();
+
+    public readonly mouseMove = new EventEmitter<ScreenMouseEvent>();
+    public readonly mouseDown = new EventEmitter<ScreenMouseEvent>();
+    public readonly mouseUp = new EventEmitter<ScreenMouseEvent>();
+    public readonly click = new EventEmitter<ScreenMouseEvent>();
+    public readonly doubleClick = new EventEmitter<ScreenMouseEvent>();
 
     private _glyphWidth = Glyph.WIDTH;
     private _glyphHeight = Glyph.HEIGHT;
@@ -65,10 +76,6 @@ export class Screen {
     private _isMouseEnabled = false;
     private _originalCanvasCursor: string | null = null;
     private _mouseLocation: Point = { x: 0, y: 0 };
-
-    private _eventHandlers: { [key in ScreenMouseEventType]?: Array<EventHandler<ScreenMouseEvent>>; } &
-                            { [key in ScreenKeyboardEventType]?: Array<EventHandler<ScreenKeyboardEvent>>; } &
-                            { resize?: Array<EventHandler<void>> } = {};
 
     constructor(private _container: HTMLElement, dimensions?: Size) {
         const canvas = this.createCanvas(_container, dimensions);
@@ -238,36 +245,6 @@ export class Screen {
         }
     }
 
-    public addEventHandler(event: 'resize', handler: EventHandler<void>): void;
-    public addEventHandler(event: ScreenKeyboardEventType, handler: EventHandler<ScreenKeyboardEvent>): void;
-    public addEventHandler(event: ScreenMouseEventType, handler: EventHandler<ScreenMouseEvent>): void;
-    addEventHandler(event: ScreenEventTypes, handler: EventHandler<any>) {
-        let eventHandlers = this._eventHandlers[event];
-        if (eventHandlers === undefined) {
-            eventHandlers = [];
-            this._eventHandlers[event] = eventHandlers;
-        }
-
-        if (eventHandlers.indexOf(handler) < 0) {
-            eventHandlers.push(handler);
-        }
-    }
-
-    public removeEventHandler(event: 'resize', handler: EventHandler<void>): void;
-    public removeEventHandler(event: ScreenKeyboardEventType, handler: EventHandler<ScreenKeyboardEvent>): void;
-    public removeEventHandler(event: ScreenMouseEventType, handler: EventHandler<ScreenMouseEvent>): void;
-    removeEventHandler(event:  ScreenEventTypes, handler: EventHandler<any>) {
-        const eventHandlers = this._eventHandlers[event];
-        if (eventHandlers === undefined) {
-            return;
-        }
-
-        const index = eventHandlers.indexOf(handler);
-        if (index >= 0) {
-            eventHandlers.splice(index, 1);
-        }
-    }
-
     public destroy() {
         this.isResizable = false;
         this.isCursorVisible = false;
@@ -301,7 +278,7 @@ export class Screen {
     private onMouseMove(event: MouseEvent, previous: Point, current: Point) {
         this.renderGlyph(this._state[previous.y][previous.x], previous.x, previous.y);
         this.renderGlyph(this._state[current.y][current.x], current.x, current.y, true);
-        this.fireMouseEvent(event, 'mousemove');
+        this.fireMouseEvent(event, 'mousemove', this.mouseMove);
     }
 
     private onWindowResize = (_event: UIEvent) => {
@@ -316,9 +293,9 @@ export class Screen {
         this.refresh();
     }
 
-    private onCanvasKeyDown = (event: KeyboardEvent) => this.fireKeyboardEvent(event, 'keydown');
-    private onCanvasKeyUp = (event: KeyboardEvent) => this.fireKeyboardEvent(event, 'keyup');
-    private onCanvasKeyPress = (event: KeyboardEvent) => this.fireKeyboardEvent(event, 'keypress');
+    private onCanvasKeyDown = (event: KeyboardEvent) => this.fireKeyboardEvent(event, 'keydown', this.keyDown);
+    private onCanvasKeyUp = (event: KeyboardEvent) => this.fireKeyboardEvent(event, 'keyup', this.keyUp);
+    private onCanvasKeyPress = (event: KeyboardEvent) => this.fireKeyboardEvent(event, 'keypress', this.keyPress);
     private onCanvasContextMenu = (event: MouseEvent) => event.preventDefault();
     private onCanvasMouseMove = (event: MouseEvent) => {
         const posX = Math.floor(event.clientX / this._glyphWidth);
@@ -332,10 +309,10 @@ export class Screen {
             }
         }
     }
-    private onCanvasMouseDown = (event: MouseEvent) => this.fireMouseEvent(event, 'mousedown');
-    private onCanvasMouseUp = (event: MouseEvent) => this.fireMouseEvent(event, 'mouseup');
-    private onCanvasMouseClick = (event: MouseEvent) => this.fireMouseEvent(event, 'click');
-    private onCanvasMouseDblClick = (event: MouseEvent) => this.fireMouseEvent(event, 'dblclick');
+    private onCanvasMouseDown = (event: MouseEvent) => this.fireMouseEvent(event, 'mousedown', this.mouseDown);
+    private onCanvasMouseUp = (event: MouseEvent) => this.fireMouseEvent(event, 'mouseup', this.mouseUp);
+    private onCanvasMouseClick = (event: MouseEvent) => this.fireMouseEvent(event, 'click', this.click);
+    private onCanvasMouseDblClick = (event: MouseEvent) => this.fireMouseEvent(event, 'dblclick', this.doubleClick);
 
     private showCursor() {
         let isCursorGlyphVisible = false;
@@ -376,9 +353,8 @@ export class Screen {
         this._canvas.tabIndex = this._originalCanvasTabIndex;
     }
 
-    private fireKeyboardEvent(event: KeyboardEvent, screenEventType: ScreenKeyboardEventType) {
-        const handlers = this._eventHandlers[screenEventType];
-        Screen.fireHandlers(handlers, {
+    private fireKeyboardEvent(event: KeyboardEvent, screenEventType: ScreenKeyboardEventType, emitter: EventEmitter<ScreenKeyboardEvent>) {
+        emitter.emit({
             type: screenEventType,
             key: event.key,
             code: event.code,
@@ -417,9 +393,8 @@ export class Screen {
         this._mouseLocation = { x: 0, y: 0 };
     }
 
-    private fireMouseEvent(event: MouseEvent, screenEventType: ScreenMouseEventType) {
-        const handlers = this._eventHandlers[screenEventType];
-        Screen.fireHandlers(handlers, {
+    private fireMouseEvent(event: MouseEvent, screenEventType: ScreenMouseEventType, emitter: EventEmitter<ScreenMouseEvent>) {
+        emitter.emit({
             type: screenEventType,
             position: this.mouseLocation,
             buttons: event.buttons,
@@ -447,7 +422,7 @@ export class Screen {
             const glyph = new Glyph();
             glyph.foreground = foreground;
             glyph.background = background;
-            glyph.addEventHandler('changed', () => renderer(glyph, x, y));
+            glyph.changed.subscribe(() => renderer(glyph, x, y));
             return glyph;
         };
 
@@ -490,7 +465,7 @@ export class Screen {
         };
 
         this.render(0, 0, this._columns, this._rows);
-        Screen.fireHandlers(this._eventHandlers.resize, undefined);
+        this.resized.emit();
     }
 
     private createCanvas(container: HTMLElement, dimensions?: Size) {
@@ -507,19 +482,5 @@ export class Screen {
 
         container.appendChild(canvas);
         return canvas;
-    }
-
-    private static fireHandlers<TArg>(handlers: Array<(e: TArg) => void> | undefined, arg: TArg) {
-        if (handlers === undefined) {
-            return;
-        }
-
-        for (const handler of handlers) {
-            try {
-                handler(arg);
-            } catch (err) {
-                console.error(`Event handler failed: `, err);
-            }
-        }
     }
 }

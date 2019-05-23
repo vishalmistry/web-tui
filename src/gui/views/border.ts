@@ -56,7 +56,7 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
         super.draw(ctx, region);
     }
 
-    public click(event: GUIMouseEvent) {
+    public onClick(event: GUIMouseEvent) {
         if (event.shiftKey) {
             this.hasFocus = true;
         } else {
@@ -65,7 +65,7 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
         }
     }
 
-    public doubleClick(_event: GUIMouseEvent) {
+    public onDoubleClick(_event: GUIMouseEvent) {
         if (this._mainView === undefined) {
             return;
         }
@@ -82,7 +82,7 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
         this._mainView.addChild(this.createdView);
     }
 
-    public keyPress(event: GUIKeyboardEvent) {
+    public onKeyPress(event: GUIKeyboardEvent) {
         this.lastKey = event.key;
         this.invalidate(new Rect(0, 0, 1, 1));
     }
