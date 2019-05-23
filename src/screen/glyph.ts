@@ -4,8 +4,6 @@ import { EventEmitter } from '../common';
 export type GlyphProperty = 'code' | 'background' | 'foreground';
 
 export class Glyph {
-    public readonly changed = new EventEmitter<GlyphProperty>();
-
     // tslint:disable-next-line: max-line-length
     private static readonly CHARACTERS = ' ☺☻♥♦♣♠•◘○◙♂♀♪♫☼►◄↕‼¶§▬↨↑↓→←∟↔▲▼ !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~⌂ÇüéâäàåçêëèïîìÄÅÉæÆôöòûùÿÖÜ¢£¥₧ƒáíóúñÑªº¿⌐¬½¼¡«»░▒▓│┤╡╢╖╕╣║╗╝╜╛┐└┴┬├─┼╞╟╚╔╩╦╠═╬╧╨╤╥╙╘╒╓╫╪┘┌█▄▌▐▀αßΓπΣσµτΦΘΩδ∞φε∩≡±≥≤⌠⌡÷≈°∙·√ⁿ²■ ';
     // tslint:disable-next-line: max-line-length
@@ -14,6 +12,8 @@ export class Glyph {
         .then((image) => Glyph.convertImageToSpriteBitmap(image));
     public static readonly WIDTH = 9;
     public static readonly HEIGHT = 16;
+
+    public readonly changed = new EventEmitter<GlyphProperty>();
 
     private _code = 32;
     private _foreground = 0;

@@ -79,7 +79,7 @@ export class Application {
     private onClick = (event: ScreenMouseEvent) =>
         this.fireMouseEvent(event, hasClickHandler, (v, args) => v.onClick(args))
 
-    private onDoubleClick = (event: ScreenMouseEvent) => 
+    private onDoubleClick = (event: ScreenMouseEvent) =>
         this.fireMouseEvent(event, hasDoubleClickHandler, (v, args) => v.onDoubleClick(args))
 
     private fireMouseEvent<T>(event: ScreenMouseEvent,
