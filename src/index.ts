@@ -1,4 +1,4 @@
-import { Rect } from './gui';
+import { Rect } from './common';
 import { Application } from './gui/application';
 import { Border } from './gui/views/border';
 import { Screen } from './screen/screen';

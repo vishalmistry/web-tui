@@ -1,4 +1,5 @@
-import { Rect, View } from '.';
+import { View } from '.';
+import { Rect } from '../common';
 import { Screen } from '../screen';
 
 export class ScreenContext {

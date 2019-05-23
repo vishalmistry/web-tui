@@ -9,10 +9,10 @@ import {
     hasMouseDownHandler,
     hasMouseMoveHandler,
     hasMouseUpHandler,
-    Rect,
     ScreenContext,
     View,
 } from '.';
+import { Rect } from '../common';
 import { Screen, ScreenKeyboardEvent, ScreenMouseEvent } from '../screen';
 
 export class Application {
@@ -22,7 +22,7 @@ export class Application {
 
     public start() {
         this.refresh();
-        this.mainView.redraw = this.refresh;
+        this.mainView.invalidated.subscribe(this.refresh);
 
         this.screen.addEventHandler('keydown', this.onKeyDown);
         this.screen.addEventHandler('keyup', this.onKeyUp);
@@ -35,6 +35,8 @@ export class Application {
     }
 
     public stop() {
+        this.mainView.invalidated.unsubscribe(this.refresh);
+
         this.screen.removeEventHandler('keydown', this.onKeyDown);
         this.screen.removeEventHandler('keyup', this.onKeyUp);
         this.screen.removeEventHandler('keypress', this.onKeyPress);

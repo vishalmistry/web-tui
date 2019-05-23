@@ -1,4 +1,5 @@
-import { GUIMouseEvent, OnClick, OnKeyPress, Rect, View } from '..';
+import { GUIMouseEvent, OnClick, OnKeyPress, View } from '..';
+import { Rect } from '../../common';
 import { GUIKeyboardEvent, OnDoubleClick } from '../interfaces';
 import { ScreenContext } from '../screen-context';
 

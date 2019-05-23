@@ -1,13 +1,14 @@
-import { Rect, ScreenContext } from '..';
+import { ScreenContext } from '..';
+import { EventEmitter, Rect } from '../../common';
 
 export class View {
+    public invalidated = new EventEmitter<Rect>();
+
     private _parent?: View;
     private _children: View[] = [];
     private _hasFocus = false;
     private _focusedChild?: View = undefined;
     private _bounds: Rect;
-
-    public redraw?: (region: Rect) => void;
 
     constructor(private _frame: Rect) {
         this._bounds = new Rect(0, 0, _frame.width, _frame.height);
@@ -113,10 +114,10 @@ export class View {
         }
 
         if (this.parent === undefined) {
-            if (this.redraw !== undefined) {
+            if (this.invalidated.hasSubscribers) {
                 const redrawRegion = region.intersection(this.frame);
                 if (redrawRegion !== undefined) {
-                    this.redraw(redrawRegion);
+                    this.invalidated.emit(redrawRegion);
                 }
             }
             return;
