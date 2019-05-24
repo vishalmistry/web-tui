@@ -30,6 +30,21 @@ export class View {
         return this._frame;
     }
 
+    public set frame(value: Rect) {
+        if (value.equal(this._frame)) {
+            return;
+        }
+
+        const previous = this._frame;
+        this._frame = value;
+        this._bounds = new Rect(0, 0, this._frame.width, this._frame.height);
+
+        if (this.parent !== undefined) {
+            this.parent.invalidate(previous);
+        }
+        this.invalidate();
+    }
+
     public get bounds(): Rect {
         return this._bounds;
     }

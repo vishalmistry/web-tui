@@ -1,12 +1,14 @@
 import { Rect } from './common';
 import { Application } from './gui/application';
 import { Border } from './gui/views/border';
+import { Button } from './gui/views/button';
 import { Screen } from './screen/screen';
 
 const app = document.getElementById('app') as HTMLDivElement;
 
 // tslint:disable-next-line: no-unused-expression
-const screen = new Screen(app, {width: 80, height: 25});
+const screen = new Screen(app);
+screen.isResizable = true;
 screen.isMouseEnabled = true;
 screen.isKeyboardEnabled = true;
 screen.isCursorVisible = true;
@@ -18,7 +20,7 @@ const border1 = new Border(new Rect(2, 2, 10, 10), mainView);
 border1.background = 7;
 mainView.addChild(border1);
 
-const border2 = new Border(new Rect(69, 7, 10, 10));
+const border2 = new Border(new Rect(72, 7, 10, 10));
 border2.background = 1;
 mainView.addChild(border2);
 
@@ -27,17 +29,28 @@ innerBorder.background = 4;
 innerBorder.hasFocus = true;
 border2.addChild(innerBorder);
 
-const separateBorder = new Border(new Rect(13, 2, 2, 2));
+const separateBorder = new Border(new Rect(13, 2, 4, 2));
 separateBorder.background = 3;
 separateBorder.hasFocus = true;
 mainView.addChild(separateBorder);
+
+let i = 0;
+const button = new Button(4, 11, 'Button');
+button.clicked.subscribe(() => {
+    button.text = `Clicked ${i++}`;
+    screen.moveTo(1, 23);
+    screen.print(button.text);
+
+    button.frame = button.frame.moveBy(1, 0);
+});
+mainView.addChild(button);
 
 const application = new Application(screen, mainView);
 application.start();
 
 // screen.print('DMKC');
 
-// screen.addEventHandler('mousemove', (ev) => {
+// screen.mouseMove.subscribe((ev) => {
 //     if (ev.buttons === 1) {
 //         screen.moveTo(ev.position);
 //     }
@@ -46,7 +59,7 @@ application.start();
 //         screen.setCharacter(219);
 //     }
 // });
-// screen.addEventHandler('mousedown', (ev) => {
+// screen.mouseDown.subscribe((ev) => {
 //     if (ev.position.x === 0 && ev.position.y === 0) {
 //         screen.destroy();
 //         return;
@@ -56,7 +69,7 @@ application.start();
 //         return;
 //     }
 //     if (ev.position.x === 2 && ev.position.y === 0) {
-//         screen.isKeyboardEnabled = false;
+//         screen.isKeyboardEnabled = !screen.isKeyboardEnabled;
 //         return;
 //     }
 //     if (ev.position.x === 3 && ev.position.y === 0) {
@@ -74,7 +87,7 @@ application.start();
 //     }
 
 // });
-// screen.addEventHandler('keypress', (ev) => {
+// screen.keyPress.subscribe((ev) => {
 //     screen.print(ev.key);
 // });
 

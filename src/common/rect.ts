@@ -27,6 +27,14 @@ export class Rect {
         return this.x + this.width - 1;
     }
 
+    public moveTo(x: number, y: number): Rect {
+        return new Rect(x, y, this.width, this.height);
+    }
+
+    public moveBy(deltaX: number, deltaY: number): Rect {
+        return new Rect(this.x + deltaX, this.y + deltaY, this.width, this.height);
+    }
+
     public contains(x: number, y: number): boolean {
         return x >= this.left && x <= this.right &&
                y >= this.top && y <= this.bottom;

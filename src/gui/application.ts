@@ -27,6 +27,7 @@ export class Application {
         this.redrawInvalidatedRegion();
         this.mainView.invalidated.subscribe(this.redrawInvalidatedRegion);
 
+        this.screen.resized.subscribe(this.onResize);
         this.screen.keyDown.subscribe(this.onKeyDown);
         this.screen.keyUp.subscribe(this.onKeyUp);
         this.screen.keyPress.subscribe(this.onKeyPress);
@@ -40,6 +41,7 @@ export class Application {
     public stop() {
         this.mainView.invalidated.unsubscribe(this.redrawInvalidatedRegion);
 
+        this.screen.resized.unsubscribe(this.onResize);
         this.screen.keyDown.unsubscribe(this.onKeyDown);
         this.screen.keyUp.unsubscribe(this.onKeyUp);
         this.screen.keyPress.unsubscribe(this.onKeyPress);
@@ -60,6 +62,8 @@ export class Application {
                 new ScreenContext(this.screen, this.mainView.focusedView));
         }
     }
+
+    private onResize = () => this.redrawInvalidatedRegion();
 
     private onKeyDown = (event: ScreenKeyboardEvent) =>
         this.fireKeyboardEvent(event, hasKeyDownHandler, (v, args) => v.onKeyDown(args))

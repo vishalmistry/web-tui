@@ -13,6 +13,16 @@ export class Button extends View implements OnClick, OnKeyPress, OnMouseEnter, O
         super(Button.calculateFrame(x, y, _text));
     }
 
+    public get text() {
+        return this._text;
+    }
+
+    public set text(value: string) {
+        this._text = value;
+        this.frame = Button.calculateFrame(this.frame.x, this.frame.y, value);
+        this.invalidate();
+    }
+
     public draw(ctx: ScreenContext, _region?: Rect) {
         ctx.foreground = 15;
         ctx.background = this._isMouseOver ? 3 : 1;
