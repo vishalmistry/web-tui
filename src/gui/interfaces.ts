@@ -41,6 +41,20 @@ export function hasKeyPressHandler<T>(object: T): object is T & OnKeyPress {
     return typeof (object as any).onKeyPress === 'function';
 }
 
+export interface OnMouseEnter {
+    onMouseEnter(): void;
+}
+export function hasMouseEnterHandler<T>(object: T): object is T & OnMouseEnter {
+    return typeof (object as any).onMouseEnter === 'function';
+}
+
+export interface OnMouseLeave {
+    onMouseLeave(): void;
+}
+export function hasMouseLeaveHandler<T>(object: T): object is T & OnMouseLeave {
+    return typeof (object as any).onMouseLeave === 'function';
+}
+
 export interface OnMouseMove {
     onMouseMove(event: GUIMouseEvent): void;
 }

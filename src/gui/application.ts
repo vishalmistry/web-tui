@@ -7,6 +7,8 @@ import {
     hasKeyPressHandler,
     hasKeyUpHandler,
     hasMouseDownHandler,
+    hasMouseEnterHandler,
+    hasMouseLeaveHandler,
     hasMouseMoveHandler,
     hasMouseUpHandler,
     ScreenContext,
@@ -16,6 +18,7 @@ import { Rect } from '../common';
 import { Screen, ScreenKeyboardEvent, ScreenMouseEvent } from '../screen';
 
 export class Application {
+    private _hoverView?: View;
 
     constructor(private screen: Screen, private mainView: View) {
     }
@@ -67,8 +70,28 @@ export class Application {
     private onKeyPress = (event: ScreenKeyboardEvent) =>
         this.fireKeyboardEvent(event, hasKeyPressHandler, (v, args) => v.onKeyPress(args))
 
-    private onMouseMove = (event: ScreenMouseEvent) =>
-        this.fireMouseEvent(event, hasMouseMoveHandler, (v, args) => v.onMouseMove(args))
+    private onMouseMove = (event: ScreenMouseEvent) => {
+        const target = Application.findTarget(this.mainView, event.position.x, event.position.y);
+
+        if (target.view !== this._hoverView) {
+            if (this._hoverView !== undefined && hasMouseLeaveHandler(this._hoverView)) {
+                this._hoverView.onMouseLeave();
+            }
+            if (target.view !== undefined && hasMouseEnterHandler(target.view)) {
+                target.view.onMouseEnter();
+            }
+
+            this._hoverView = target.view;
+        }
+
+        if (target.view === undefined) {
+            return;
+        }
+
+        if (hasMouseMoveHandler(target.view)) {
+            target.view.onMouseMove({...event, x: target.x, y: target.y });
+        }
+    }
 
     private onMouseDown = (event: ScreenMouseEvent) =>
         this.fireMouseEvent(event, hasMouseDownHandler, (v, args) => v.onMouseDown(args))
