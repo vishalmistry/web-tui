@@ -252,12 +252,15 @@ export class Screen {
         this.isMouseEnabled = false;
     }
 
-    private rerenderGlyphAtCursor(invert = false) {
+    private rerenderGlyphAtCursor() {
+        const isMouseAtCursor = this.cursorLocation.x === this.mouseLocation.x &&
+                                this.cursorLocation.y === this.mouseLocation.y;
+
         this.renderGlyph(
             this._state[this.cursorLocation.y][this.cursorLocation.x],
             this.cursorLocation.x,
             this.cursorLocation.y,
-            invert);
+            isMouseAtCursor);
     }
 
     private renderGlyph = (g: Glyph, x: number, y: number, invert = false) => {
@@ -317,14 +320,14 @@ export class Screen {
     private showCursor() {
         let isCursorGlyphVisible = false;
         this._cursorBlinkTimerHandle = setInterval(() => {
-            const isMouseAtCursor = this.cursorLocation.x === this.mouseLocation.x &&
-                                    this.cursorLocation.y === this.mouseLocation.y;
 
             isCursorGlyphVisible = !isCursorGlyphVisible;
             if (isCursorGlyphVisible) {
+                const isMouseAtCursor = this.cursorLocation.x === this.mouseLocation.x &&
+                                        this.cursorLocation.y === this.mouseLocation.y;
                 this.renderCursor(this.cursorLocation.x, this.cursorLocation.y, isMouseAtCursor);
             } else {
-                this.rerenderGlyphAtCursor(isMouseAtCursor);
+                this.rerenderGlyphAtCursor();
             }
         }, Screen.CURSOR_BLINK_INTERVAL);
     }
@@ -415,14 +418,15 @@ export class Screen {
             return;
         }
 
-        const foreground = this._palette.defaultForegroundCode;
-        const background = this._palette.defaultBackgroundCode;
-        const renderer = this.renderGlyph;
         const createGlyph = (x: number, y: number) => {
             const glyph = new Glyph();
-            glyph.foreground = foreground;
-            glyph.background = background;
-            glyph.changed.subscribe(() => renderer(glyph, x, y));
+            glyph.foreground = this._palette.defaultForegroundCode;
+            glyph.background = this._palette.defaultBackgroundCode;
+            glyph.changed.subscribe(() => {
+                const isMouseOver = x === this.mouseLocation.x &&
+                                    y === this.mouseLocation.y;
+                this.renderGlyph(glyph, x, y, isMouseOver);
+            });
             return glyph;
         };
 
