@@ -26,15 +26,6 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
             }
         }
 
-        ctx.moveTo(1, 0);
-        ctx.horizontalRepeat(196, this.bounds.width - 2);
-        ctx.moveTo(1, this.bounds.bottom);
-        ctx.horizontalRepeat(196, this.bounds.width - 2);
-        ctx.moveTo(0, 1);
-        ctx.verticalRepeat(179, this.bounds.height - 2);
-        ctx.moveTo(this.bounds.right, 1);
-        ctx.verticalRepeat(179, this.bounds.height - 2);
-
         let message = 'HELLO WORLD';
         const y = Math.floor(this.bounds.height / 2);
         let x = 0;
@@ -47,6 +38,8 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
 
         ctx.moveTo(x, y);
         ctx.print(message);
+
+        ctx.drawFrame(this.bounds, 'single');
 
         if (this.lastKey !== undefined) {
             ctx.moveTo(0, 0);

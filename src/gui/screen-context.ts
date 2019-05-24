@@ -3,6 +3,9 @@ import { Rect } from '../common';
 import { Screen } from '../screen';
 
 export class ScreenContext {
+    private static readonly SINGLE_FRAME_CHARS = '─│┌┐└┘';
+    private static readonly DOUBLE_FRAME_CHARS = '═║╔╗╚╝';
+
     private _bounds: Rect;
     private _clip!: Rect;
     private _cursorLocation: { x: number, y: number };
@@ -125,6 +128,76 @@ export class ScreenContext {
         for (let y = intersection.top; y <= intersection.bottom; y++) {
             this._screen.moveTo(this._screen.cursorLocation.x, y);
             this._screen.setCharacter(str);
+        }
+    }
+
+    public drawFrame(rect: Rect, style: 'single' | 'double') {
+        const absoluteRect = new Rect(
+            rect.x + this._bounds.x,
+            rect.y + this._bounds.y,
+            rect.width,
+            rect.height);
+        const intersection = absoluteRect.intersection(this._clip);
+        if (intersection === undefined) {
+            return;
+        }
+        const frameChars = style === 'single'
+            ? ScreenContext.SINGLE_FRAME_CHARS
+            : ScreenContext.DOUBLE_FRAME_CHARS;
+
+        const hLines = [
+            intersection.top === absoluteRect.top ? intersection.top : -1,
+            intersection.bottom === absoluteRect.bottom ? intersection.bottom : -1,
+        ];
+        for (const y of hLines) {
+            if (y < 0) {
+                continue;
+            }
+
+            const left = intersection.left + (intersection.left === absoluteRect.left ? 1 : 0);
+            const right = intersection.right - (intersection.right === absoluteRect.right ? 1 : 0);
+            for (let x = left; x <= right; x++) {
+                this._screen.moveTo(x, y);
+                this._screen.setCharacter(frameChars[0]);
+            }
+        }
+
+        const vLines = [
+            intersection.left === absoluteRect.left ? intersection.left : -1,
+            intersection.right === absoluteRect.right ? intersection.right : -1,
+        ];
+        for (const x of vLines) {
+            if (x < 0) {
+                continue;
+            }
+            const top = intersection.top + (intersection.top === absoluteRect.top ? 1 : 0);
+            const bottom = intersection.bottom - (intersection.bottom === absoluteRect.bottom ? 1 : 0);
+
+            for (let y = top; y <= bottom; y++) {
+                this._screen.moveTo(x, y);
+                this._screen.setCharacter(frameChars[1]);
+            }
+        }
+
+        if (intersection.top === absoluteRect.top) {
+            if (intersection.left === absoluteRect.left) {
+                this._screen.moveTo(intersection.left, intersection.top);
+                this._screen.setCharacter(frameChars[2]);
+            }
+            if (intersection.right === absoluteRect.right) {
+                this._screen.moveTo(intersection.right, intersection.top);
+                this._screen.setCharacter(frameChars[3]);
+            }
+        }
+        if (intersection.bottom === absoluteRect.bottom) {
+            if (intersection.left === absoluteRect.left) {
+                this._screen.moveTo(intersection.left, intersection.bottom);
+                this._screen.setCharacter(frameChars[4]);
+            }
+            if (intersection.right === absoluteRect.right) {
+                this._screen.moveTo(intersection.right, intersection.bottom);
+                this._screen.setCharacter(frameChars[5]);
+            }
         }
     }
 
