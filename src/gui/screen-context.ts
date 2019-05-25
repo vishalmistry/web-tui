@@ -60,10 +60,6 @@ export class ScreenContext {
             throw new Error('Bad arguments');
         }
 
-        if (x > this._bounds.right || y > this._bounds.bottom) {
-            throw new Error('Position out of bounds');
-        }
-
         this._cursorLocation = {
             x: x + this._bounds.x,
             y: y + this._bounds.y,
@@ -232,7 +228,9 @@ export class ScreenContext {
     }
 
     private isCursorOnScreen() {
-        return this._cursorLocation.x < this._screen.columns &&
+        return this._cursorLocation.x >= 0 &&
+               this._cursorLocation.y >= 0 &&
+               this._cursorLocation.x < this._screen.columns &&
                this._cursorLocation.y < this._screen.rows;
     }
 
