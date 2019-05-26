@@ -20,11 +20,11 @@ export class Rect {
     }
 
     public get bottom() {
-        return this.y + this.height - 1;
+        return this.y + this.height;
     }
 
     public get right() {
-        return this.x + this.width - 1;
+        return this.x + this.width;
     }
 
     public moveTo(x: number, y: number): Rect {
@@ -36,8 +36,8 @@ export class Rect {
     }
 
     public contains(x: number, y: number): boolean {
-        return x >= this.left && x <= this.right &&
-               y >= this.top && y <= this.bottom;
+        return x >= this.left && x < this.right &&
+               y >= this.top && y < this.bottom;
     }
 
     public intersection(other: Rect): Rect | undefined {
@@ -46,8 +46,8 @@ export class Rect {
         const ib = Math.min(this.bottom, other.bottom);
         const ir = Math.min(this.right, other.right);
 
-        const iw = ir - il + 1;
-        const ih = ib - it + 1;
+        const iw = ir - il;
+        const ih = ib - it;
 
         if (iw <= 0 || ih <= 0) {
             return undefined;

@@ -19,8 +19,8 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
 
         ctx.background = this.background;
         ctx.foreground = 15;
-        for (let y = region.top; y <= region.bottom; y++) {
-            for (let x = region.left; x <= region.right; x++) {
+        for (let y = region.top; y < region.bottom; y++) {
+            for (let x = region.left; x < region.right; x++) {
                 ctx.moveTo(x, y);
                 ctx.setCharacter(this.hasFocus ? ':' : ' ');
             }
