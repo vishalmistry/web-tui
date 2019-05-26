@@ -1,6 +1,5 @@
 import {
     GUIKeyboardEvent,
-    GUIMouseEvent,
     hasClickHandler,
     hasDoubleClickHandler,
     hasKeyDownHandler,
@@ -19,6 +18,7 @@ import { Screen, ScreenKeyboardEvent, ScreenMouseEvent } from '../screen';
 
 export class Application {
     private _hoverView?: View;
+    private _mouseDownView?: View;
 
     constructor(private screen: Screen, private mainView: View) {
     }
@@ -34,7 +34,6 @@ export class Application {
         this.screen.mouseMove.subscribe(this.onMouseMove);
         this.screen.mouseDown.subscribe(this.onMouseDown);
         this.screen.mouseUp.subscribe(this.onMouseUp);
-        this.screen.click.subscribe(this.onClick);
         this.screen.doubleClick.subscribe(this.onDoubleClick);
     }
 
@@ -48,7 +47,6 @@ export class Application {
         this.screen.mouseMove.unsubscribe(this.onMouseMove);
         this.screen.mouseDown.unsubscribe(this.onMouseDown);
         this.screen.mouseUp.unsubscribe(this.onMouseUp);
-        this.screen.click.unsubscribe(this.onClick);
         this.screen.doubleClick.unsubscribe(this.onDoubleClick);
     }
 
@@ -88,48 +86,44 @@ export class Application {
             this._hoverView = target.view;
         }
 
-        if (target.view === undefined) {
-            return;
-        }
-
         if (hasMouseMoveHandler(target.view)) {
             target.view.onMouseMove({...event, x: target.x, y: target.y });
         }
     }
 
-    private onMouseDown = (event: ScreenMouseEvent) =>
-        this.fireMouseEvent(event, hasMouseDownHandler, (v, args) => v.onMouseDown(args))
-
-    private onMouseUp = (event: ScreenMouseEvent) =>
-        this.fireMouseEvent(event, hasMouseUpHandler, (v, args) => v.onMouseUp(args))
-
-    private onClick = (event: ScreenMouseEvent) =>
-        this.fireMouseEvent(event, hasClickHandler, (v, args) => v.onClick(args))
-
-    private onDoubleClick = (event: ScreenMouseEvent) =>
-        this.fireMouseEvent(event, hasDoubleClickHandler, (v, args) => v.onDoubleClick(args))
-
-    private fireMouseEvent<T>(event: ScreenMouseEvent,
-                              guard: (view: View) => view is View & T,
-                              handler: (view: View & T, args: GUIMouseEvent) => void): void {
+    private onMouseDown = (event: ScreenMouseEvent) => {
         const target = Application.findTarget(this.mainView, event.position.x, event.position.y);
-        if (target.view === undefined) {
-            return;
+        this._mouseDownView = target.view;
+
+        if (hasMouseDownHandler(target.view)) {
+            target.view.onMouseDown({...event, x: target.x, y: target.y});
+        }
+    }
+
+    private onMouseUp = (event: ScreenMouseEvent) => {
+        const target = Application.findTarget(this.mainView, event.position.x, event.position.y);
+
+        if (hasMouseUpHandler(target.view)) {
+            target.view.onMouseUp({...event, x: target.x, y: target.y});
         }
 
-        if (guard(target.view)) {
-            handler(target.view, {...event, x: target.x, y: target.y });
+        if (target.view === this._mouseDownView && hasClickHandler(target.view)) {
+            target.view.onClick({...event, x: target.x, y: target.y});
+        }
+    }
+
+    private onDoubleClick = (event: ScreenMouseEvent) => {
+        const target = Application.findTarget(this.mainView, event.position.x, event.position.y);
+
+        if (hasDoubleClickHandler(target.view)) {
+            target.view.onDoubleClick({...event, x: target.x, y: target.y});
         }
     }
 
     private fireKeyboardEvent<T>(event: ScreenKeyboardEvent,
-                                 guard: (view: View) => view is View & T,
+                                 guard: (view: View | undefined) => view is View & T,
                                  handler: (view: View & T, args: GUIKeyboardEvent) => void): void {
         const target = this.mainView.focusedView;
-        if (target === undefined) {
-            return;
-        }
-
         if (guard(target)) {
             handler(target, event);
         }
