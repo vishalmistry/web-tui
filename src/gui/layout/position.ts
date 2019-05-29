@@ -4,6 +4,11 @@ import { View } from '..';
 
 export abstract class Position  {
     private static NUMBER_REGEX = /^\d+(.\d+)?%?$/;
+    private static NO_DEPENDENCIES = new Array<View>();
+
+    public get dependencies(): ReadonlyArray<View> {
+        return Position.NO_DEPENDENCIES;
+    }
 
     abstract absoluteValue(max: number): number;
 
@@ -91,9 +96,19 @@ class CenterPosition extends Position {
     }
 }
 
-class ViewLeftPosition extends Position {
-    constructor(private _view: View) {
+abstract class ViewRelativePosition extends Position {
+    constructor(protected _view: View) {
         super();
+    }
+
+    public get dependencies(): ReadonlyArray<View> {
+        return [this._view];
+    }
+}
+
+class ViewLeftPosition extends ViewRelativePosition {
+    constructor(_view: View) {
+        super(_view);
     }
 
     absoluteValue(_max: number): number {
@@ -101,9 +116,9 @@ class ViewLeftPosition extends Position {
     }
 }
 
-class ViewTopPostion extends Position {
-    constructor(private _view: View) {
-        super();
+class ViewTopPostion extends ViewRelativePosition {
+    constructor(_view: View) {
+        super(_view);
     }
 
     absoluteValue(_max: number): number {
@@ -111,9 +126,9 @@ class ViewTopPostion extends Position {
     }
 }
 
-class ViewRightPostion extends Position {
-    constructor(private _view: View) {
-        super();
+class ViewRightPostion extends ViewRelativePosition {
+    constructor(_view: View) {
+        super(_view);
     }
 
     absoluteValue(_max: number): number {
@@ -121,9 +136,9 @@ class ViewRightPostion extends Position {
     }
 }
 
-class ViewBottomPostion extends Position {
-    constructor(private _view: View) {
-        super();
+class ViewBottomPostion extends ViewRelativePosition {
+    constructor(_view: View) {
+        super(_view);
     }
 
     absoluteValue(_max: number): number {
@@ -136,6 +151,10 @@ class AddPosition extends Position {
         super();
     }
 
+    public get dependencies(): ReadonlyArray<View> {
+        return [...this._left.dependencies, ...this._right.dependencies];
+    }
+
     absoluteValue(max: number): number {
         return this._left.absoluteValue(max) + this._right.absoluteValue(max);
     }
@@ -144,6 +163,10 @@ class AddPosition extends Position {
 class SubtractPosition extends Position {
     constructor(private _left: Position, private _right: Position) {
         super();
+    }
+
+    public get dependencies(): ReadonlyArray<View> {
+        return [...this._left.dependencies, ...this._right.dependencies];
     }
 
     absoluteValue(max: number): number {

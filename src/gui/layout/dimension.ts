@@ -3,7 +3,12 @@ import { View } from '..';
 // tslint:disable max-classes-per-file no-use-before-declare
 
 export abstract class Dimension {
+    private static NO_DEPENDENCIES = new Array<View>();
     private static NUMBER_REGEX = /^\d+(.\d+)?%?$/;
+
+    public get dependencies(): ReadonlyArray<View> {
+        return Dimension.NO_DEPENDENCIES;
+    }
 
     abstract absoluteValue(max: number): number;
 
@@ -73,9 +78,19 @@ class PercentDimension extends Dimension {
     }
 }
 
-class ViewHeightDimension extends Dimension {
-    constructor(private _view: View) {
+abstract class ViewRelativeDimension extends Dimension {
+    constructor(protected _view: View) {
         super();
+    }
+
+    public get dependencies(): ReadonlyArray<View> {
+        return [this._view];
+    }
+}
+
+class ViewHeightDimension extends ViewRelativeDimension {
+    constructor(_view: View) {
+        super(_view);
     }
 
     absoluteValue(_max: number): number {
@@ -83,9 +98,9 @@ class ViewHeightDimension extends Dimension {
     }
 }
 
-class ViewWidthDimension extends Dimension {
-    constructor(private _view: View) {
-        super();
+class ViewWidthDimension extends ViewRelativeDimension {
+    constructor(_view: View) {
+        super(_view);
     }
 
     absoluteValue(_max: number): number {
@@ -98,6 +113,10 @@ class AddDimension extends Dimension {
         super();
     }
 
+    public get dependencies(): ReadonlyArray<View> {
+        return [...this._left.dependencies, ...this._right.dependencies];
+    }
+
     absoluteValue(max: number): number {
         return this._left.absoluteValue(max) + this._right.absoluteValue(max);
     }
@@ -106,6 +125,10 @@ class AddDimension extends Dimension {
 class SubtractDimension extends Dimension {
     constructor(private _left: Dimension, private _right: Dimension) {
         super();
+    }
+
+    public get dependencies(): ReadonlyArray<View> {
+        return [...this._left.dependencies, ...this._right.dependencies];
     }
 
     absoluteValue(max: number): number {

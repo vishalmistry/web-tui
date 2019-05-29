@@ -35,6 +35,10 @@ export class Rect {
         return new Rect(this.x + deltaX, this.y + deltaY, this.width, this.height);
     }
 
+    public setSize(width: number, height: number) {
+        return new Rect (this.x, this.y, width, height);
+    }
+
     public contains(x: number, y: number): boolean {
         return x >= this.left && x < this.right &&
                y >= this.top && y < this.bottom;

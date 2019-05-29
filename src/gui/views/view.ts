@@ -1,5 +1,6 @@
 import { ScreenContext } from '..';
 import { EventEmitter, Rect } from '../../common';
+import { Dimension, Position } from '../layout';
 
 export class View {
     public readonly invalidated = new EventEmitter<Rect>();
@@ -9,6 +10,12 @@ export class View {
     private _hasFocus = false;
     private _focusedChild?: View = undefined;
     private _bounds: Rect;
+
+    // Relative Layout
+    private _x: Position | undefined;
+    private _y: Position | undefined;
+    private _width: Dimension | undefined;
+    private _height: Dimension | undefined;
 
     constructor(private _frame: Rect) {
         this._bounds = new Rect(0, 0, _frame.width, _frame.height);
@@ -43,6 +50,42 @@ export class View {
             this.parent.invalidate(previous);
         }
         this.invalidate();
+    }
+
+    public get x(): Position | undefined {
+        return this._x;
+    }
+
+    public set x(value: Position | undefined) {
+        this._x = value;
+        this.invalidateLayout();
+    }
+
+    public get y(): Position | undefined {
+        return this._y;
+    }
+
+    public set y(value: Position | undefined) {
+        this._y = value;
+        this.invalidateLayout();
+    }
+
+    public get width(): Dimension | undefined {
+        return this._width;
+    }
+
+    public set width(value: Dimension | undefined) {
+        this._width = value;
+        this.invalidateLayout();
+    }
+
+    public get height(): Dimension | undefined {
+        return this._height;
+    }
+
+    public set height(value: Dimension | undefined) {
+        this.height = value;
+        this.invalidateLayout();
     }
 
     public get bounds(): Rect {
@@ -144,6 +187,21 @@ export class View {
             region.width,
             region.height);
         this.parent.invalidate(parentRegion);
+    }
+
+    protected invalidateLayout() {
+    }
+
+    protected calculateFrame(hostRect: Rect) {
+        const x = this.x === undefined ? 0 : this.x.absoluteValue(hostRect.width);
+        const width = this.width === undefined ? hostRect.width : this.width.absoluteValue(hostRect.width - x);
+        const y = this.y === undefined ? 0 : this.y.absoluteValue(hostRect.height);
+        const height = this.height === undefined ? hostRect.height : this.height.absoluteValue(hostRect.height - y);
+
+        this.frame = new Rect(x, y, width, height);
+    }
+
+    protected updateLayout() {
     }
 
     private setFocusedChild(value: View | undefined) {
