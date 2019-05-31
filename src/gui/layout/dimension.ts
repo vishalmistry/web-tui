@@ -12,6 +12,8 @@ export abstract class Dimension {
 
     abstract absoluteValue(max: number): number;
 
+    abstract equal(other: Dimension): boolean;
+
     public add(pos: Dimension | number | string): Dimension {
         return new AddDimension(this, Dimension.from(pos));
     }
@@ -53,6 +55,16 @@ export abstract class Dimension {
     public static heightOf(view: View): Dimension {
         return new ViewHeightDimension(view);
     }
+
+    public static equal(a: Dimension | undefined, b: Dimension | undefined): boolean {
+        if (a === undefined && b === undefined) {
+            return true;
+        }
+        if (a === undefined || b === undefined) {
+            return false;
+        }
+        return a.equal(b);
+    }
 }
 
 class AbsoluteDimension extends Dimension {
@@ -62,6 +74,10 @@ class AbsoluteDimension extends Dimension {
 
     absoluteValue(_max: number): number {
         return this._value;
+    }
+
+    equal(other: Dimension): boolean {
+        return other instanceof AbsoluteDimension && other._value === this._value;
     }
 }
 
@@ -76,6 +92,10 @@ class PercentDimension extends Dimension {
     absoluteValue(max: number): number {
         return Math.round((this._value / 100) * max);
     }
+
+    equal(other: Dimension): boolean {
+        return other instanceof PercentDimension && other._value === this._value;
+    }
 }
 
 abstract class ViewRelativeDimension extends Dimension {
@@ -85,6 +105,10 @@ abstract class ViewRelativeDimension extends Dimension {
 
     public get dependencies(): ReadonlyArray<View> {
         return [this._view];
+    }
+
+    equal(other: Dimension): boolean {
+        return other instanceof ViewRelativeDimension && other._view === this._view;
     }
 }
 
@@ -120,6 +144,12 @@ class AddDimension extends Dimension {
     absoluteValue(max: number): number {
         return this._left.absoluteValue(max) + this._right.absoluteValue(max);
     }
+
+    equal(other: Dimension): boolean {
+        return other instanceof AddDimension &&
+               ((other._left.equal(this._left) && other._right.equal(this._right)) ||
+                (other._left.equal(this._right) && other._right.equal(this._left)));
+    }
 }
 
 class SubtractDimension extends Dimension {
@@ -133,5 +163,11 @@ class SubtractDimension extends Dimension {
 
     absoluteValue(max: number): number {
         return this._left.absoluteValue(max) - this._right.absoluteValue(max);
+    }
+
+    equal(other: Dimension): boolean {
+        return other instanceof SubtractDimension &&
+               other._left.equal(this._left) &&
+               other._right.equal(this._right);
     }
 }

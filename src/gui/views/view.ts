@@ -1,8 +1,12 @@
 import { ScreenContext } from '..';
-import { EventEmitter, Rect } from '../../common';
+import { EventEmitter, Graph, Rect } from '../../common';
 import { Dimension, Position } from '../layout';
 
+type LayoutMode = 'absolute' | 'computed';
+
 export class View {
+    private static COMPUTATION_REQUIRED = new Rect(0, 0, 0, 0);
+
     public readonly invalidated = new EventEmitter<Rect>();
 
     private _parent?: View;
@@ -11,14 +15,24 @@ export class View {
     private _focusedChild?: View = undefined;
     private _bounds: Rect;
 
-    // Relative Layout
+    // Layout
+    private _layoutMode: LayoutMode;
+    private _frame: Rect;
     private _x: Position | undefined;
     private _y: Position | undefined;
     private _width: Dimension | undefined;
     private _height: Dimension | undefined;
 
-    constructor(private _frame: Rect) {
-        this._bounds = new Rect(0, 0, _frame.width, _frame.height);
+    constructor(frame?: Rect) {
+        if (frame === undefined) {
+            this._layoutMode = 'computed';
+            this._frame = View.COMPUTATION_REQUIRED;
+            this._bounds = View.COMPUTATION_REQUIRED;
+        } else {
+            this._layoutMode = 'absolute';
+            this._frame = frame;
+            this._bounds = new Rect(0, 0, frame.width, frame.height);
+        }
     }
 
     public get parent(): View | undefined {
@@ -31,6 +45,19 @@ export class View {
 
     public get focusedView(): View | undefined {
         return this.hasFocus ? this : this._focusedChild;
+    }
+
+    public get layoutMode(): LayoutMode {
+        return this._layoutMode;
+    }
+
+    public set layoutMode(value: LayoutMode) {
+        if (this._layoutMode === value) {
+            return;
+        }
+
+        this._layoutMode = value;
+        this.invalidateLayout();
     }
 
     public get frame(): Rect {
@@ -49,6 +76,13 @@ export class View {
         if (this.parent !== undefined) {
             this.parent.invalidate(previous);
         }
+
+        this.invalidateLayout();
+        if (!previous.sizeEqual(value)) {
+            // Since this view's bounds changed, need to recalculate layout
+            // of children
+            this.layoutChildren();
+        }
         this.invalidate();
     }
 
@@ -57,6 +91,10 @@ export class View {
     }
 
     public set x(value: Position | undefined) {
+        if (Position.equal(this._x, value)) {
+            return;
+        }
+
         this._x = value;
         this.invalidateLayout();
     }
@@ -66,6 +104,10 @@ export class View {
     }
 
     public set y(value: Position | undefined) {
+        if (Position.equal(this._y, value)) {
+            return;
+        }
+
         this._y = value;
         this.invalidateLayout();
     }
@@ -75,6 +117,10 @@ export class View {
     }
 
     public set width(value: Dimension | undefined) {
+        if (Dimension.equal(this._width, value)) {
+            return;
+        }
+
         this._width = value;
         this.invalidateLayout();
     }
@@ -84,7 +130,11 @@ export class View {
     }
 
     public set height(value: Dimension | undefined) {
-        this.height = value;
+        if (Dimension.equal(this._height, value)) {
+            return;
+        }
+
+        this._height = value;
         this.invalidateLayout();
     }
 
@@ -121,7 +171,7 @@ export class View {
             this.clearCurrentFocus();
             this.setFocusedChild(view);
         }
-
+        this.layoutChildren();
         this.invalidate(view.frame);
     }
 
@@ -137,6 +187,7 @@ export class View {
         if (view.hasFocus || view._focusedChild !== undefined) {
             this.setFocusedChild(undefined);
         }
+        this.layoutChildren();
         this.invalidate(view.frame);
     }
 
@@ -190,9 +241,16 @@ export class View {
     }
 
     protected invalidateLayout() {
+        if (this.parent !== undefined) {
+            this.parent.layoutChildren();
+        }
     }
 
-    protected calculateFrame(hostRect: Rect) {
+    public recalculateFrame(hostRect: Rect) {
+        if (this.layoutMode !== 'computed') {
+            return;
+        }
+
         const x = this.x === undefined ? 0 : this.x.absoluteValue(hostRect.width);
         const width = this.width === undefined ? hostRect.width : this.width.absoluteValue(hostRect.width - x);
         const y = this.y === undefined ? 0 : this.y.absoluteValue(hostRect.height);
@@ -201,7 +259,47 @@ export class View {
         this.frame = new Rect(x, y, width, height);
     }
 
-    protected updateLayout() {
+    private layoutChildren() {
+        if (this.children.length === 0) {
+            return;
+        }
+
+        const g = new Graph<View>();
+        for (const view of this.children) {
+            g.addNode(view);
+
+            if (view.x !== undefined) {
+                for (const v of view.x.dependencies) {
+                    g.addEdge(v, view);
+                }
+            }
+            if (view.y !== undefined) {
+                for (const v of view.y.dependencies) {
+                    g.addEdge(v, view);
+                }
+            }
+            if (view.width !== undefined) {
+                for (const v of view.width.dependencies) {
+                    g.addEdge(v, view);
+                }
+            }
+            if (view.height !== undefined) {
+                for (const v of view.height.dependencies) {
+                    g.addEdge(v, view);
+                }
+            }
+        }
+
+        const views = g.topologicalSort();
+        for (const view of views) {
+            if (this.children.indexOf(view) < 0) {
+                throw new Error('View dependencies must be siblings');
+            }
+
+            if (view.layoutMode === 'computed') {
+                view.recalculateFrame(this.bounds);
+            }
+        }
     }
 
     private setFocusedChild(value: View | undefined) {

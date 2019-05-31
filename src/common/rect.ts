@@ -66,4 +66,9 @@ export class Rect {
                this.width === other.width &&
                this.height === other.height;
     }
+
+    public sizeEqual(other: Rect) {
+        return this.width === other.width &&
+               this.height === other.height;
+    }
 }

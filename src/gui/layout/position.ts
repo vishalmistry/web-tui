@@ -12,6 +12,8 @@ export abstract class Position  {
 
     abstract absoluteValue(max: number): number;
 
+    abstract equal(other: Position): boolean;
+
     public add(pos: Position | number | string): Position {
         return new AddPosition(this, Position.from(pos));
     }
@@ -65,6 +67,16 @@ export abstract class Position  {
     public static bottomOf(view: View): Position {
         return new ViewBottomPostion(view);
     }
+
+    public static equal(a: Position | undefined, b: Position | undefined): boolean {
+        if (a === undefined && b === undefined) {
+            return true;
+        }
+        if (a === undefined || b === undefined) {
+            return false;
+        }
+        return a.equal(b);
+    }
 }
 
 class AbsolutePosition extends Position {
@@ -74,6 +86,10 @@ class AbsolutePosition extends Position {
 
     absoluteValue(_max: number): number {
         return this._value;
+    }
+
+    equal(other: Position): boolean {
+        return other instanceof AbsolutePosition && other._value === this._value;
     }
 }
 
@@ -88,11 +104,19 @@ class PercentPosition extends Position {
     absoluteValue(max: number): number {
         return Math.round((this._value / 100) * max);
     }
+
+    equal(other: Position): boolean {
+        return other instanceof PercentPosition && other._value === this._value;
+    }
 }
 
 class CenterPosition extends Position {
     absoluteValue(max: number): number {
         return Math.round(max / 2);
+    }
+
+    equal(other: Position): boolean {
+        return other instanceof CenterPosition;
     }
 }
 
@@ -103,6 +127,10 @@ abstract class ViewRelativePosition extends Position {
 
     public get dependencies(): ReadonlyArray<View> {
         return [this._view];
+    }
+
+    equal(other: Position): boolean {
+        return other instanceof ViewRelativePosition && other._view === this._view;
     }
 }
 
@@ -158,6 +186,12 @@ class AddPosition extends Position {
     absoluteValue(max: number): number {
         return this._left.absoluteValue(max) + this._right.absoluteValue(max);
     }
+
+    equal(other: Position): boolean {
+        return other instanceof AddPosition &&
+               ((other._left.equal(this._left) && other._right.equal(this._right)) ||
+                (other._left.equal(this._right) && other._right.equal(this._left)));
+    }
 }
 
 class SubtractPosition extends Position {
@@ -171,5 +205,11 @@ class SubtractPosition extends Position {
 
     absoluteValue(max: number): number {
         return this._left.absoluteValue(max) - this._right.absoluteValue(max);
+    }
+
+    equal(other: Position): boolean {
+        return other instanceof SubtractPosition &&
+               other._left.equal(this._left) &&
+               other._right.equal(this._right);
     }
 }

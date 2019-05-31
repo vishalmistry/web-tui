@@ -24,6 +24,9 @@ export class Application {
     }
 
     public start() {
+        if (this.mainView.layoutMode === 'computed') {
+            this.mainView.recalculateFrame(new Rect(0, 0, this.screen.columns, this.screen.rows));
+        }
         this.redrawInvalidatedRegion();
         this.mainView.invalidated.subscribe(this.redrawInvalidatedRegion);
 
@@ -61,7 +64,12 @@ export class Application {
         }
     }
 
-    private onResize = () => this.redrawInvalidatedRegion();
+    private onResize = () => {
+        if (this.mainView.layoutMode === 'computed') {
+            this.mainView.recalculateFrame(new Rect(0, 0, this.screen.columns, this.screen.rows));
+        }
+        this.redrawInvalidatedRegion();
+    }
 
     private onKeyDown = (event: ScreenKeyboardEvent) =>
         this.fireKeyboardEvent(event, hasKeyDownHandler, (v, args) => v.onKeyDown(args))
