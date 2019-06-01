@@ -5,7 +5,7 @@ import { Dimension, Position } from '../layout';
 type LayoutMode = 'absolute' | 'computed';
 
 export class View {
-    private static COMPUTATION_REQUIRED = new Rect(0, 0, 0, 0);
+    private static FRAME_COMPUTATION_REQUIRED = new Rect(0, 0, 0, 0);
 
     public readonly invalidated = new EventEmitter<Rect>();
 
@@ -26,8 +26,8 @@ export class View {
     constructor(frame?: Rect) {
         if (frame === undefined) {
             this._layoutMode = 'computed';
-            this._frame = View.COMPUTATION_REQUIRED;
-            this._bounds = View.COMPUTATION_REQUIRED;
+            this._frame = View.FRAME_COMPUTATION_REQUIRED;
+            this._bounds = View.FRAME_COMPUTATION_REQUIRED;
         } else {
             this._layoutMode = 'absolute';
             this._frame = frame;
@@ -260,7 +260,7 @@ export class View {
     }
 
     private layoutChildren() {
-        if (this.children.length === 0) {
+        if (this.frame === View.FRAME_COMPUTATION_REQUIRED || this.children.length === 0) {
             return;
         }
 
