@@ -23,7 +23,7 @@ export class Button extends View implements OnClick, OnKeyPress, OnMouseEnter, O
         this.invalidate();
     }
 
-    public draw(ctx: ScreenContext, _region?: Rect) {
+    public draw(ctx: ScreenContext, _region: Rect) {
         ctx.foreground = 15;
         ctx.background = this._isMouseOver ? 3 : 1;
         ctx.moveTo(0, 0);

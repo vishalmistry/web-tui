@@ -8,15 +8,11 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
     public lastKey?: string;
     public background = 0;
 
-    constructor(frame: Rect, private _mainView?: View) {
+    constructor(frame?: Rect, private _mainView?: View) {
         super(frame);
     }
 
-    public draw(ctx: ScreenContext, region?: Rect) {
-        if (region === undefined) {
-            region = this.bounds;
-        }
-
+    public draw(ctx: ScreenContext, region: Rect) {
         ctx.background = this.background;
         ctx.foreground = 15;
         for (let y = region.top; y < region.bottom; y++) {

@@ -17,6 +17,10 @@ import { Rect } from '../common';
 import { Screen, ScreenKeyboardEvent, ScreenMouseEvent } from '../screen';
 
 export class Application {
+    private static readonly REDRAW_FREQ = 60;
+
+    private _invalidatedRegion: Rect | undefined;
+    private _redrawScheduled = false;
     private _hoverView?: View;
     private _mouseDownView?: View;
 
@@ -27,8 +31,8 @@ export class Application {
         if (this.mainView.layoutMode === 'computed') {
             this.mainView.recalculateFrame(new Rect(0, 0, this.screen.columns, this.screen.rows));
         }
-        this.redrawInvalidatedRegion();
-        this.mainView.invalidated.subscribe(this.redrawInvalidatedRegion);
+        this.scheduleRedraw();
+        this.mainView.invalidated.subscribe(this.scheduleRedraw);
 
         this.screen.resized.subscribe(this.onResize);
         this.screen.keyDown.subscribe(this.onKeyDown);
@@ -41,7 +45,7 @@ export class Application {
     }
 
     public stop() {
-        this.mainView.invalidated.unsubscribe(this.redrawInvalidatedRegion);
+        this.mainView.invalidated.unsubscribe(this.scheduleRedraw);
 
         this.screen.resized.unsubscribe(this.onResize);
         this.screen.keyDown.unsubscribe(this.onKeyDown);
@@ -53,15 +57,36 @@ export class Application {
         this.screen.doubleClick.unsubscribe(this.onDoubleClick);
     }
 
-    private redrawInvalidatedRegion = (region?: Rect) => {
+    private scheduleRedraw = (region?: Rect) => {
+        region = region === undefined ? this.mainView.bounds : region;
+        if (this._invalidatedRegion === undefined) {
+            this._invalidatedRegion = region;
+        } else {
+            this._invalidatedRegion = this._invalidatedRegion.union(region);
+        }
+
+        if (!this._redrawScheduled) {
+            this._redrawScheduled = true;
+            setTimeout(this.redrawInvalidatedRegion, Math.floor(1000 / Application.REDRAW_FREQ));
+        }
+    }
+
+    private redrawInvalidatedRegion = () => {
+        if (this._invalidatedRegion === undefined) {
+            return;
+        }
+
         const refreshContext = new ScreenContext(this.screen, this.mainView);
-        refreshContext.setClip(region);
-        this.mainView.draw(refreshContext, region);
+        refreshContext.setClip(this._invalidatedRegion);
+        this.mainView.draw(refreshContext, this._invalidatedRegion);
 
         if (this.mainView.focusedView !== undefined) {
             this.mainView.focusedView.positionCursor(
                 new ScreenContext(this.screen, this.mainView.focusedView));
         }
+
+        this._invalidatedRegion = undefined;
+        this._redrawScheduled = false;
     }
 
     private onResize = () => {

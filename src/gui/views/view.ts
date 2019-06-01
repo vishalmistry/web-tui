@@ -5,8 +5,6 @@ import { Dimension, Position } from '../layout';
 type LayoutMode = 'absolute' | 'computed';
 
 export class View {
-    private static FRAME_COMPUTATION_REQUIRED = new Rect(0, 0, 0, 0);
-
     public readonly invalidated = new EventEmitter<Rect>();
 
     private _parent?: View;
@@ -26,8 +24,8 @@ export class View {
     constructor(frame?: Rect) {
         if (frame === undefined) {
             this._layoutMode = 'computed';
-            this._frame = View.FRAME_COMPUTATION_REQUIRED;
-            this._bounds = View.FRAME_COMPUTATION_REQUIRED;
+            this._frame = Rect.EMPTY;
+            this._bounds = Rect.EMPTY;
         } else {
             this._layoutMode = 'absolute';
             this._frame = frame;
@@ -191,11 +189,7 @@ export class View {
         this.invalidate(view.frame);
     }
 
-    public draw(ctx: ScreenContext, region?: Rect) {
-        if (region === undefined) {
-            region = this.bounds;
-        }
-
+    public draw(ctx: ScreenContext, region: Rect) {
         for (const child of this.children) {
             const intersection = region.intersection(child.frame);
             if (intersection !== undefined) {
@@ -260,7 +254,7 @@ export class View {
     }
 
     private layoutChildren() {
-        if (this.frame === View.FRAME_COMPUTATION_REQUIRED || this.children.length === 0) {
+        if (this.frame.isEmpty() || this.children.length === 0) {
             return;
         }
 
