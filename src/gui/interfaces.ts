@@ -1,3 +1,5 @@
+import { View } from './views';
+
 export type GUIKeyboardEventType = 'keyup' | 'keydown' | 'keypress';
 export type GUIMouseEventType = 'mousemove' | 'mousedown' | 'mouseup' | 'click' | 'dblclick';
 
@@ -7,6 +9,8 @@ export interface GUIInputEvent<T extends string> {
     readonly ctrlKey: boolean;
     readonly altKey: boolean;
     readonly metaKey: boolean;
+    readonly source: View;
+    handled: boolean;
 }
 
 export interface GUIKeyboardEvent extends GUIInputEvent<GUIKeyboardEventType> {

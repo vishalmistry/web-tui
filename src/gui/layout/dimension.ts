@@ -40,12 +40,16 @@ export abstract class Dimension {
         return value;
     }
 
-    public static sized(position: number): Dimension {
-        return new AbsoluteDimension(position);
+    public static sized(size: number): Dimension {
+        return new AbsoluteDimension(size);
     }
 
-    public static percent(relativePosition: number): Dimension {
-        return new PercentDimension(relativePosition);
+    public static percent(relativeSize: number): Dimension {
+        return new PercentDimension(relativeSize);
+    }
+
+    public static fill(): Dimension {
+        return new PercentDimension(100);
     }
 
     public static widthOf(view: View): Dimension {
