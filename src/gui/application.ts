@@ -149,9 +149,16 @@ export class Application {
     private fireKeyboardEvent<T>(event: ScreenKeyboardEvent,
                                  guard: (view: View | undefined) => view is View & T,
                                  handler: (view: View & T, args: GUIKeyboardEvent) => void): void {
-        const target = this.mainView.focusedView;
-        if (guard(target)) {
-            handler(target, {...event, source: this.mainView.focusedView as View, handled: false });
+        let view = this.mainView.focusedView;
+        while (view !== undefined) {
+            if (guard(view)) {
+                const arg = {...event, source: this.mainView.focusedView as View, handled: false };
+                handler(view, arg);
+                if (arg.handled) {
+                    break;
+                }
+            }
+            view = view.parent;
         }
     }
 
