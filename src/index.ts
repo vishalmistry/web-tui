@@ -1,7 +1,8 @@
 import { Rect } from './common';
 import { Application } from './gui/application';
+import { Dimension, Position } from './gui/layout';
+import { Button, GroupBox } from './gui/views';
 import { Border } from './gui/views/border';
-import { Button } from './gui/views/button';
 import { Screen } from './screen/screen';
 
 const app = document.getElementById('app') as HTMLDivElement;
@@ -13,37 +14,72 @@ screen.isMouseEnabled = true;
 screen.isKeyboardEnabled = true;
 screen.isCursorVisible = true;
 
-const mainView = new Border(new Rect(0, 0, screen.columns, screen.rows));
+const mainView = new Border();
+// mainView.x = Position.at(10);
+// mainView.y = Position.at(10);
+// mainView.width = Dimension.percent(90);
+// mainView.height = Dimension.percent(90);
 mainView.background = 0;
-
-const border1 = new Border(new Rect(2, 2, 10, 10), mainView);
-border1.background = 7;
-mainView.addChild(border1);
 
 const border2 = new Border(new Rect(72, 7, 10, 10));
 border2.background = 1;
 mainView.addChild(border2);
 
-const innerBorder = new Border(new Rect(5, 5, 7, 7));
-innerBorder.background = 4;
-innerBorder.hasFocus = true;
-border2.addChild(innerBorder);
+const border1 = new Border(undefined, mainView);
+border1.x = Position.percent(30);
+border1.y = Position.center();
+border1.height = Dimension.sized(10);
+border1.width = Dimension.percent(30);
+border1.background = 7;
+mainView.addChild(border1);
 
-const separateBorder = new Border(new Rect(13, 2, 4, 2));
+const groupBox = new GroupBox('Box');
+groupBox.x = Position.at(1);
+groupBox.y = Position.end();
+groupBox.width = Dimension.percent(40);
+groupBox.height = Dimension.sized(6);
+border1.addChild(groupBox);
+
+const innerBorder2 = new Border();
+innerBorder2.x = Position.rightOf(groupBox).add(2);
+innerBorder2.y = Position.at(2);
+innerBorder2.width = Dimension.widthOf(groupBox);
+innerBorder2.height = Dimension.heightOf(groupBox);
+innerBorder2.background = 3;
+border1.addChild(innerBorder2);
+
+const separateBorder = new Border();
+separateBorder.x = Position.rightOf(border1);
+separateBorder.y = Position.bottomOf(border1);
+separateBorder.width = Dimension.sized(4);
+separateBorder.height = Dimension.sized(2);
 separateBorder.background = 3;
 separateBorder.hasFocus = true;
 mainView.addChild(separateBorder);
 
 let i = 0;
-const button = new Button(4, 11, 'Button');
+const button = new Button('Button');
+button.x = Position.center();
+button.y = Position.percent(30);
 button.clicked.subscribe(() => {
-    button.text = `Clicked ${i++}`;
+    button.text = `Clicked ${++i}`;
     screen.moveTo(1, 23);
     screen.print(button.text);
 
-    button.frame = button.frame.moveBy(1, 0);
+    if (i === 1) {
+    border1.height = Dimension.fill(80);
+
+    groupBox.x = Position.percent(10);
+    groupBox.y = Position.center();
+    groupBox.width = Dimension.fill(40);
+    groupBox.height = Dimension.percent(80);
+    } else if (i === 5) {
+        border1.width = Dimension.fill(100);
+    } else {
+        border1.x = border1.x === undefined ? Position.at(0) : border1.x.add(1);
+    }
 });
-mainView.addChild(button);
+groupBox.addChild(button);
 
 const application = new Application(screen, mainView);
 application.start();

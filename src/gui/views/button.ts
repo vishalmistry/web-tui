@@ -2,6 +2,7 @@ import { View } from '.';
 import { ScreenContext } from '..';
 import { EventEmitter, Rect } from '../../common';
 import { GUIKeyboardEvent, GUIMouseEvent, OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave } from '../interfaces';
+import { Dimension } from '../layout';
 
 export class Button extends View implements OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave {
 
@@ -9,8 +10,13 @@ export class Button extends View implements OnClick, OnKeyPress, OnMouseEnter, O
 
     private _isMouseOver = false;
 
-    constructor(x: number, y: number, private _text: string) {
-        super(Button.calculateFrame(x, y, _text));
+    constructor(private _text: string) {
+        super();
+        const width = Button.calculateWidth(_text);
+
+        this.frame = new Rect(0, 0, width, 1);
+        this.width = Dimension.sized(width);
+        this.height = Dimension.sized(1);
     }
 
     public get text() {
@@ -18,8 +24,15 @@ export class Button extends View implements OnClick, OnKeyPress, OnMouseEnter, O
     }
 
     public set text(value: string) {
+        if (this._text === value) {
+            return;
+        }
+
         this._text = value;
-        this.frame = Button.calculateFrame(this.frame.x, this.frame.y, value);
+
+        const width = Button.calculateWidth(this._text);
+        this.frame = this.frame.setSize(width, 1);
+        this.width = Dimension.sized(width);
         this.invalidate();
     }
 
@@ -34,8 +47,9 @@ export class Button extends View implements OnClick, OnKeyPress, OnMouseEnter, O
         ctx.moveTo(2, 0);
     }
 
-    onClick(_event: GUIMouseEvent): void {
+    onClick(event: GUIMouseEvent): void {
         this.clicked.emit();
+        event.handled = true;
     }
 
     onKeyPress(event: GUIKeyboardEvent): void {
@@ -55,7 +69,7 @@ export class Button extends View implements OnClick, OnKeyPress, OnMouseEnter, O
         this.invalidate();
     }
 
-    private static calculateFrame(x: number, y: number, text: string) {
-        return new Rect(x, y, text.length + 4, 1);
+    private static calculateWidth(text: string) {
+        return text.length + 4;
     }
 }

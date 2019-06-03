@@ -1,6 +1,6 @@
-import { GUIMouseEvent, OnClick, OnKeyPress, View } from '..';
+import { GUIMouseEvent, OnKeyPress, View } from '..';
 import { Rect } from '../../common';
-import { GUIKeyboardEvent, OnDoubleClick } from '../interfaces';
+import { GUIKeyboardEvent, OnClick, OnDoubleClick } from '../interfaces';
 import { ScreenContext } from '../screen-context';
 
 export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
@@ -52,6 +52,7 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
             this.background = (this.background + 1) % 16;
             this.invalidate();
         }
+        event.handled = true;
     }
 
     public onDoubleClick(_event: GUIMouseEvent) {
@@ -74,5 +75,6 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
     public onKeyPress(event: GUIKeyboardEvent) {
         this.lastKey = event.key;
         this.invalidate(new Rect(0, 0, 1, 1));
+        event.handled = true;
     }
 }
