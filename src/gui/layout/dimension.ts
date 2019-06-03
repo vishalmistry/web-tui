@@ -10,7 +10,11 @@ export abstract class Dimension {
         return Dimension.NO_DEPENDENCIES;
     }
 
-    abstract absoluteValue(max: number): number;
+    public get needsPosition(): boolean {
+        return false;
+    }
+
+    abstract absoluteValue(max: number, position?: number): number;
 
     abstract equal(other: Dimension): boolean;
 
@@ -48,8 +52,8 @@ export abstract class Dimension {
         return new PercentDimension(relativeSize);
     }
 
-    public static fill(): Dimension {
-        return new PercentDimension(100);
+    public static fill(percent: number = 100): Dimension {
+        return new FillDimension(percent);
     }
 
     public static widthOf(view: View): Dimension {
@@ -102,6 +106,24 @@ class PercentDimension extends Dimension {
     }
 }
 
+class FillDimension extends Dimension {
+    constructor(private _percent: number) {
+        super();
+    }
+
+    get needsPosition(): boolean {
+        return true;
+    }
+
+    absoluteValue(max: number, position: number): number {
+        return Math.round((max - position) * (this._percent / 100));
+    }
+
+    equal(other: Dimension): boolean {
+        return other instanceof FillDimension;
+    }
+}
+
 abstract class ViewRelativeDimension extends Dimension {
     constructor(protected _view: View) {
         super();
@@ -145,8 +167,12 @@ class AddDimension extends Dimension {
         return [...this._left.dependencies, ...this._right.dependencies];
     }
 
-    absoluteValue(max: number): number {
-        return this._left.absoluteValue(max) + this._right.absoluteValue(max);
+    get needsPosition(): boolean {
+        return this._left.needsPosition || this._right.needsPosition;
+    }
+
+    absoluteValue(max: number, position?: number): number {
+        return this._left.absoluteValue(max, position) + this._right.absoluteValue(max, position);
     }
 
     equal(other: Dimension): boolean {
@@ -161,12 +187,16 @@ class SubtractDimension extends Dimension {
         super();
     }
 
-    public get dependencies(): ReadonlyArray<View> {
+    get dependencies(): ReadonlyArray<View> {
         return [...this._left.dependencies, ...this._right.dependencies];
     }
 
-    absoluteValue(max: number): number {
-        return this._left.absoluteValue(max) - this._right.absoluteValue(max);
+    get needsPosition(): boolean {
+        return this._left.needsPosition || this._right.needsPosition;
+    }
+
+    absoluteValue(max: number, position?: number): number {
+        return this._left.absoluteValue(max, position) - this._right.absoluteValue(max, position);
     }
 
     equal(other: Dimension): boolean {

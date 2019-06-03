@@ -245,10 +245,31 @@ export class View {
             return;
         }
 
-        const x = this.x === undefined ? 0 : this.x.absoluteValue(hostRect.width);
-        const width = this.width === undefined ? hostRect.width : this.width.absoluteValue(hostRect.width - x);
-        const y = this.y === undefined ? 0 : this.y.absoluteValue(hostRect.height);
-        const height = this.height === undefined ? hostRect.height : this.height.absoluteValue(hostRect.height - y);
+        let [x, y, width, height] = [0, 0, 0, 0];
+
+        if (this.x !== undefined && this.x.needsSize &&
+            this.width !== undefined && this.width.needsPosition) {
+            x = this.x.absoluteValue(hostRect.width, hostRect.width);
+            width = this.width.absoluteValue(hostRect.width, 0);
+        } else if (this.x !== undefined && this.x.needsSize) {
+            width = this.width === undefined ? hostRect.width : this.width.absoluteValue(hostRect.width);
+            x = this.x.absoluteValue(hostRect.width, width);
+        } else {
+            x = this.x === undefined ? 0 : this.x.absoluteValue(hostRect.width);
+            width = this.width === undefined ? hostRect.width : this.width.absoluteValue(hostRect.width, x);
+        }
+
+        if (this.y !== undefined && this.y.needsSize &&
+            this.height !== undefined && this.height.needsPosition) {
+            y = this.y.absoluteValue(hostRect.height, hostRect.height);
+            height = this.height.absoluteValue(hostRect.height, 0);
+        } else if (this.y !== undefined && this.y.needsSize) {
+            height = this.height === undefined ? hostRect.height : this.height.absoluteValue(hostRect.height);
+            y = this.y.absoluteValue(hostRect.height, height);
+        } else {
+            y = this.y === undefined ? 0 : this.y.absoluteValue(hostRect.height);
+            height = this.height === undefined ? hostRect.height : this.height.absoluteValue(hostRect.height, y);
+        }
 
         this.frame = new Rect(x, y, width, height);
     }

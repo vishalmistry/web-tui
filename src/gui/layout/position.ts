@@ -2,7 +2,7 @@ import { View } from '..';
 
 // tslint:disable max-classes-per-file no-use-before-declare
 
-export abstract class Position  {
+export abstract class Position {
     private static NUMBER_REGEX = /^\d+(.\d+)?%?$/;
     private static NO_DEPENDENCIES = new Array<View>();
 
@@ -10,9 +10,13 @@ export abstract class Position  {
         return Position.NO_DEPENDENCIES;
     }
 
-    abstract absoluteValue(max: number): number;
+    public get needsSize(): boolean {
+        return false;
+    }
 
-    abstract equal(other: Position): boolean;
+    public abstract absoluteValue(max: number, size?: number): number;
+
+    public abstract equal(other: Position): boolean;
 
     public add(pos: Position | number | string): Position {
         return new AddPosition(this, Position.from(pos));
@@ -50,6 +54,10 @@ export abstract class Position  {
 
     public static center(): Position {
         return new CenterPosition();
+    }
+
+    public static end(): Position {
+        return new EndPosition();
     }
 
     public static leftOf(view: View): Position {
@@ -111,12 +119,30 @@ class PercentPosition extends Position {
 }
 
 class CenterPosition extends Position {
-    absoluteValue(max: number): number {
-        return Math.round(max / 2);
+    get needsSize(): boolean {
+        return true;
+    }
+
+    absoluteValue(max: number, size: number): number {
+        return Math.round((max - size) / 2);
     }
 
     equal(other: Position): boolean {
         return other instanceof CenterPosition;
+    }
+}
+
+class EndPosition extends Position {
+    get needsSize(): boolean {
+        return true;
+    }
+
+    absoluteValue(max: number, size: number): number {
+        return max - size;
+    }
+
+    equal(other: Position): boolean {
+        return other instanceof EndPosition;
     }
 }
 
@@ -179,12 +205,16 @@ class AddPosition extends Position {
         super();
     }
 
-    public get dependencies(): ReadonlyArray<View> {
+    get dependencies(): ReadonlyArray<View> {
         return [...this._left.dependencies, ...this._right.dependencies];
     }
 
-    absoluteValue(max: number): number {
-        return this._left.absoluteValue(max) + this._right.absoluteValue(max);
+    get needsSize(): boolean {
+        return this._left.needsSize || this._right.needsSize;
+    }
+
+    absoluteValue(max: number, size?: number): number {
+        return this._left.absoluteValue(max, size) + this._right.absoluteValue(max, size);
     }
 
     equal(other: Position): boolean {
@@ -199,12 +229,16 @@ class SubtractPosition extends Position {
         super();
     }
 
-    public get dependencies(): ReadonlyArray<View> {
+    get dependencies(): ReadonlyArray<View> {
         return [...this._left.dependencies, ...this._right.dependencies];
     }
 
-    absoluteValue(max: number): number {
-        return this._left.absoluteValue(max) - this._right.absoluteValue(max);
+    get needsSize(): boolean {
+        return this._left.needsSize || this._right.needsSize;
+    }
+
+    absoluteValue(max: number, size?: number): number {
+        return this._left.absoluteValue(max, size) - this._right.absoluteValue(max, size);
     }
 
     equal(other: Position): boolean {
