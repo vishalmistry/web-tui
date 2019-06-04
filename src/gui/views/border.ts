@@ -46,16 +46,23 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
     }
 
     public onClick(event: GUIMouseEvent) {
+        if (event.source !== this) {
+            return;
+        }
+
         if (event.shiftKey) {
             this.hasFocus = true;
         } else {
-            this.background = (this.background + 1) % 16;
+            this.background = (this.background + 1) % 256;
             this.invalidate();
         }
-        event.handled = true;
     }
 
-    public onDoubleClick(_event: GUIMouseEvent) {
+    public onDoubleClick(event: GUIMouseEvent) {
+        if (event.source !== this) {
+            return;
+        }
+
         if (this._mainView === undefined) {
             return;
         }
@@ -73,8 +80,11 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
     }
 
     public onKeyPress(event: GUIKeyboardEvent) {
+        if (event.source !== this) {
+            console.log(event.source);
+            return;
+        }
         this.lastKey = event.key;
         this.invalidate(new Rect(0, 0, 1, 1));
-        event.handled = true;
     }
 }
