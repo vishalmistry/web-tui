@@ -1,6 +1,6 @@
 import { View } from '.';
 import { Rect } from '../common';
-import { Screen } from '../screen';
+import { Palette, Screen } from '../screen';
 
 export class ScreenContext {
     private static readonly SINGLE_FRAME_CHARS = '─│┌┐└┘';
@@ -25,6 +25,14 @@ export class ScreenContext {
             y: this._screen.rows,
         };
         this.setClip();
+    }
+
+    public get palette(): Palette {
+        return this._screen.palette;
+    }
+
+    public set palette(value: Palette) {
+        this._screen.palette = value;
     }
 
     public get background(): number {
