@@ -1,10 +1,10 @@
 import { View } from '.';
 import { ScreenContext } from '..';
 import { EventEmitter, Rect } from '../../common';
-import { GUIKeyboardEvent, GUIMouseEvent, OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave } from '../interfaces';
+import { GUIKeyboardEvent, GUIMouseEvent, OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave, OnMouseDown } from '../interfaces';
 import { Dimension } from '../layout';
 
-export class Button extends View implements OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave {
+export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave {
 
     public clicked = new EventEmitter<void>();
 
@@ -47,6 +47,20 @@ export class Button extends View implements OnClick, OnKeyPress, OnMouseEnter, O
         ctx.moveTo(2, 0);
     }
 
+    onMouseEnter(): void {
+        this._isMouseOver = true;
+        this.invalidate();
+    }
+
+    onMouseLeave(): void {
+        this._isMouseOver = false;
+        this.invalidate();
+    }
+
+    onMouseDown(): void {
+        this.hasFocus = true;
+    }
+
     onClick(event: GUIMouseEvent): void {
         this.clicked.emit();
         event.handled = true;
@@ -57,16 +71,6 @@ export class Button extends View implements OnClick, OnKeyPress, OnMouseEnter, O
             return;
         }
         this.clicked.emit();
-    }
-
-    onMouseEnter(): void {
-        this._isMouseOver = true;
-        this.invalidate();
-    }
-
-    onMouseLeave(): void {
-        this._isMouseOver = false;
-        this.invalidate();
     }
 
     private static calculateWidth(text: string) {
