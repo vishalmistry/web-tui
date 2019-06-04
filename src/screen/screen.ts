@@ -58,11 +58,11 @@ export class Screen {
     private _context: CanvasRenderingContext2D;
     private _columns = 0;
     private _rows = 0;
-    private _palette = Palette.default;
     private _state: Glyph[][] = [];
 
-    public foreground = this._palette.defaultForegroundCode;
-    public background = this._palette.defaultBackgroundCode;
+    private _palette: Palette;
+    public foreground: number;
+    public background: number;
 
     private _isResizable = false;
 
@@ -77,7 +77,7 @@ export class Screen {
     private _originalCanvasCursor: string | null = null;
     private _mouseLocation: Point = { x: 0, y: 0 };
 
-    constructor(private _container: HTMLElement, dimensions?: Size) {
+    constructor(private _container: HTMLElement, dimensions?: Size, palette?: Palette) {
         const canvas = this.createCanvas(_container, dimensions);
         const context = canvas.getContext('2d');
         if (context === null) {
@@ -86,6 +86,11 @@ export class Screen {
 
         this._canvas = canvas;
         this._context = context;
+
+        this._palette = palette === undefined ? Palette.dos : palette;
+        this.foreground = this._palette.defaultForegroundCode;
+        this.background = this._palette.defaultBackgroundCode;
+
         this.refresh();
     }
 
@@ -95,6 +100,19 @@ export class Screen {
 
     public get rows() {
         return this._rows;
+    }
+
+    public get palette() {
+        return this._palette;
+    }
+
+    public set palette(value: Palette) {
+        if (this._palette === value) {
+            return;
+        }
+
+        this._palette = value;
+        this.render(0, 0, this.columns, this.rows);
     }
 
     public get cursorLocation() {
