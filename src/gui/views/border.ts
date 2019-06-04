@@ -53,7 +53,7 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
         if (event.shiftKey) {
             this.hasFocus = true;
         } else {
-            this.background = (this.background + 1) % 256;
+            this.background = (this.background + 1) % 16;
             this.invalidate();
         }
     }

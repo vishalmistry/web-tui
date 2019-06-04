@@ -16,16 +16,19 @@ import {
 } from '.';
 import { Rect } from '../common';
 import { Screen, ScreenKeyboardEvent, ScreenMouseEvent } from '../screen';
+import { RootView } from './internal/root-view';
 
 export class Application {
     private static readonly REDRAW_FREQ = 60;
+
+    public readonly mainView = new RootView();
 
     private _invalidatedRegion: Rect | undefined;
     private _redrawScheduled = false;
     private _hoverView?: View;
     private _mouseDownView?: View;
 
-    constructor(private screen: Screen, private mainView: View) {
+    constructor(private screen: Screen) {
     }
 
     public start() {
