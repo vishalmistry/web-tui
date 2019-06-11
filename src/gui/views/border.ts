@@ -10,6 +10,7 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
 
     constructor(frame?: Rect, private _mainView?: View) {
         super(frame);
+        this.canFocus = true;
     }
 
     public draw(ctx: ScreenContext, region: Rect) {

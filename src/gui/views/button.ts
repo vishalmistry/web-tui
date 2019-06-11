@@ -1,7 +1,7 @@
 import { View } from '.';
 import { ScreenContext } from '..';
 import { EventEmitter, Rect } from '../../common';
-import { GUIKeyboardEvent, GUIMouseEvent, OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave, OnMouseDown } from '../interfaces';
+import { GUIKeyboardEvent, GUIMouseEvent, OnClick, OnKeyPress, OnMouseDown, OnMouseEnter, OnMouseLeave } from '../interfaces';
 import { Dimension } from '../layout';
 
 export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave {
@@ -12,8 +12,9 @@ export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, On
 
     constructor(private _text: string) {
         super();
-        const width = Button.calculateWidth(_text);
+        this.canFocus = true;
 
+        const width = Button.calculateWidth(_text);
         this.frame = new Rect(0, 0, width, 1);
         this.width = Dimension.sized(width);
         this.height = Dimension.sized(1);
@@ -38,7 +39,7 @@ export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, On
 
     public draw(ctx: ScreenContext, _region: Rect) {
         ctx.foreground = 15;
-        ctx.background = this._isMouseOver ? 3 : 1;
+        ctx.background = this._isMouseOver || this.hasFocus ? 3 : 1;
         ctx.moveTo(0, 0);
         ctx.print(`[ ${this._text} ]`);
     }

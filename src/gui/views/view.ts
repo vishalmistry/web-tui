@@ -9,6 +9,7 @@ export class View {
 
     private _parent?: View;
     private _children: View[] = [];
+    private _canFocus = false;
     private _hasFocus = false;
     private _focusedChild?: View = undefined;
     private _bounds: Rect;
@@ -138,6 +139,14 @@ export class View {
 
     public get bounds(): Rect {
         return this._bounds;
+    }
+
+    public get canFocus(): boolean {
+        return this._canFocus;
+    }
+
+    public set canFocus(value: boolean) {
+        this._canFocus = value;
     }
 
     public get hasFocus(): boolean {
@@ -335,5 +344,61 @@ export class View {
         if (focused !== undefined) {
             focused.hasFocus = false;
         }
+    }
+
+    public focusNext(fromChild?: View): boolean {
+        let childIdx = -1;
+        if (fromChild !== undefined) {
+            childIdx = this.children.indexOf(fromChild);
+            if (childIdx < 0) {
+                throw new Error('Traverse error');
+            }
+        }
+
+        for (let i = (childIdx + 1); i < this.children.length; i++) {
+            const child = this.children[i];
+            if (child.canFocus) {
+                child.hasFocus = true;
+                return true;
+            }
+
+            if (child.focusNext()) {
+                return true;
+            }
+        }
+
+        if (this.parent === undefined) {
+            return false;
+        }
+
+        return this.parent.focusNext(this);
+    }
+
+    public focusPrevious(fromChild?: View): boolean {
+        let childIdx = this.children.length;
+        if (fromChild !== undefined) {
+            childIdx = this.children.indexOf(fromChild);
+            if (childIdx < 0) {
+                throw new Error('Traverse error');
+            }
+        }
+
+        for (let i = (childIdx - 1); i >= 0; i--) {
+            const child = this.children[i];
+            if (child.focusPrevious()) {
+                return true;
+            }
+
+            if (this.canFocus) {
+                this.hasFocus = true;
+                return true;
+            }
+        }
+
+        if (this.parent === undefined) {
+            return false;
+        }
+
+        return this.parent.focusPrevious(this);
     }
 }

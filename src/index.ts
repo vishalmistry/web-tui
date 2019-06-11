@@ -14,12 +14,8 @@ screen.isMouseEnabled = true;
 screen.isKeyboardEnabled = true;
 screen.isCursorVisible = true;
 
-const mainView = new Border();
-// mainView.x = Position.at(10);
-// mainView.y = Position.at(10);
-// mainView.width = Dimension.percent(90);
-// mainView.height = Dimension.percent(90);
-mainView.background = 0;
+const application = new Application(screen);
+const mainView = application.mainView;
 
 const border2 = new Border(new Rect(72, 7, 10, 10));
 border2.background = 1;
@@ -67,21 +63,20 @@ button.clicked.subscribe(() => {
     screen.print(button.text);
 
     if (i === 1) {
-    border1.height = Dimension.fill(80);
+    border1.height = Dimension.from('50%');
 
     groupBox.x = Position.percent(10);
     groupBox.y = Position.center();
     groupBox.width = Dimension.fill(40);
     groupBox.height = Dimension.percent(80);
     } else if (i === 5) {
-        border1.width = Dimension.fill(100);
+        border1.y = Position.end();
     } else {
         border1.x = border1.x === undefined ? Position.at(0) : border1.x.add(1);
     }
 });
 groupBox.addChild(button);
 
-const application = new Application(screen, mainView);
 application.start();
 
 // screen.print('DMKC');

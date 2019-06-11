@@ -26,11 +26,11 @@ export class GroupBox extends View {
             return;
         }
 
-        const oldHeaderRect = new Rect(2, 0, Math.min(this.bounds.width - 6, this._header.length + 2), 1);
+        const oldHeaderRect = new Rect(1, 0, Math.min(this.bounds.width - 6, this._header.length + 2), 1);
 
         this._header = value;
         this.invalidate(oldHeaderRect);
-        this.invalidate(new Rect(2, 0, Math.min(this.bounds.width - 6, this._header.length + 2) , 1));
+        this.invalidate(new Rect(1, 0, Math.min(this.bounds.width - 6, this._header.length + 2) , 1));
     }
 
     public addChild(view: View) {
@@ -46,7 +46,7 @@ export class GroupBox extends View {
 
         const header = this._header.substr(0, Math.max(0, this.bounds.width - 6));
         if (header.length > 0) {
-            ctx.moveTo(2, 0);
+            ctx.moveTo(1, 0);
             ctx.print(` ${header} `);
         }
 
