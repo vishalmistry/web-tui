@@ -374,7 +374,23 @@ export class View {
         return this.parent.focusNext(this);
     }
 
-    public focusPrevious(fromChild?: View): boolean {
+    public focusPrevious(): boolean {
+        let p = this.parent;
+        let v: View = this;
+
+        while (p !== undefined) {
+            if (p.focusLast(v)) {
+                return true;
+            }
+
+            v = p;
+            p = p.parent;
+        }
+
+        return false;
+    }
+
+    public focusLast(fromChild?: View): boolean {
         let childIdx = this.children.length;
         if (fromChild !== undefined) {
             childIdx = this.children.indexOf(fromChild);
@@ -385,20 +401,16 @@ export class View {
 
         for (let i = (childIdx - 1); i >= 0; i--) {
             const child = this.children[i];
-            if (child.focusPrevious()) {
-                return true;
-            }
-
-            if (this.canFocus) {
-                this.hasFocus = true;
+            if (child.focusLast()) {
                 return true;
             }
         }
 
-        if (this.parent === undefined) {
-            return false;
+        if (this.canFocus) {
+            this.hasFocus = true;
+            return true;
         }
 
-        return this.parent.focusPrevious(this);
+        return false;
     }
 }

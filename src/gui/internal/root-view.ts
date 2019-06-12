@@ -20,10 +20,10 @@ export class RootView extends View implements OnKeyDown {
         if (event.key === '~') {
             if (this.focusedView !== undefined) {
                 if (!this.focusedView.focusPrevious()) {
-                    this.focusPrevious();
+                    this.focusLast();
                 }
             } else {
-                this.focusPrevious();
+                this.focusLast();
             }
             return;
         }
