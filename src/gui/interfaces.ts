@@ -93,3 +93,12 @@ export interface OnDoubleClick {
 export function hasDoubleClickHandler<T>(object: T): object is T & OnDoubleClick {
     return object !== undefined && typeof (object as any).onDoubleClick === 'function';
 }
+
+export interface ViewEvent {
+    source: View;
+}
+
+export interface ValueChangedEvent<T> extends ViewEvent {
+    previousValue: T;
+    newValue: T;
+}

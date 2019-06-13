@@ -87,6 +87,8 @@ export class Application {
         if (this.mainView.focusedView !== undefined) {
             this.mainView.focusedView.positionCursor(
                 new ScreenContext(this.screen, this.mainView.focusedView));
+        } else {
+            this.screen.moveTo(0, 0);
         }
 
         this._invalidatedRegion = undefined;
