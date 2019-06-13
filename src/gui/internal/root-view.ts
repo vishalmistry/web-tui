@@ -1,9 +1,16 @@
 import { GUIKeyboardEvent, ScreenContext } from '..';
 import { Rect } from '../../common';
+import { DosTheme } from '../dos-theme';
 import { OnKeyDown } from '../interfaces';
 import { View } from '../views';
 
 export class RootView extends View implements OnKeyDown {
+    constructor() {
+        super();
+
+        this.theme = DosTheme.instance;
+    }
+
     public draw(ctx: ScreenContext, region: Rect) {
         ctx.background = 0;
         ctx.foreground = 7;

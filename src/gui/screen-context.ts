@@ -1,6 +1,7 @@
 import { View } from '.';
 import { Rect } from '../common';
 import { Palette, Screen } from '../screen';
+import { Colors } from './theme';
 
 export class ScreenContext {
     private static readonly SINGLE_FRAME_CHARS = '─│┌┐└┘';
@@ -57,6 +58,11 @@ export class ScreenContext {
 
     public set isCursorVisible(value: boolean) {
         this._screen.isCursorVisible = value;
+    }
+
+    public setColors(colors: Colors) {
+        this._screen.background = colors.background;
+        this._screen.foreground = colors.foreground;
     }
 
     public moveTo(position: [number, number]): void;

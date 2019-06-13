@@ -1,6 +1,7 @@
 import { ScreenContext } from '..';
 import { EventEmitter, Graph, Rect } from '../../common';
 import { Dimension, Position } from '../layout';
+import { Theme } from '../theme';
 
 type LayoutMode = 'absolute' | 'computed';
 
@@ -12,6 +13,7 @@ export class View {
     private _canFocus = false;
     private _hasFocus = false;
     private _focusedChild?: View = undefined;
+    private _theme?: Theme;
     private _bounds: Rect;
 
     // Layout
@@ -44,6 +46,21 @@ export class View {
 
     public get focusedView(): View | undefined {
         return this.hasFocus ? this : this._focusedChild;
+    }
+
+    public get theme(): Theme {
+        if (this._theme !== undefined) {
+            return this._theme;
+        }
+
+        if (this.parent === undefined) {
+            throw new Error('No theme set!');
+        }
+        return this.parent.theme;
+    }
+
+    public set theme(value: Theme) {
+        this._theme = value;
     }
 
     public get layoutMode(): LayoutMode {

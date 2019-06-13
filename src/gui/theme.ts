@@ -1,13 +1,13 @@
 
-export interface Attribute {
+export interface Colors {
     readonly foreground: number;
     readonly background: number;
 }
 
 export interface ColorScheme {
-    readonly normal: Attribute;
-    readonly hover: Attribute;
-    readonly focused: Attribute;
+    readonly normal: Colors;
+    readonly hover: Colors;
+    readonly focused: Colors;
 }
 
 export interface Theme {

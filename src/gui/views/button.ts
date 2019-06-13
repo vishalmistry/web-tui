@@ -38,8 +38,15 @@ export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, On
     }
 
     public draw(ctx: ScreenContext, _region: Rect) {
-        ctx.foreground = 15;
-        ctx.background = this._isMouseOver || this.hasFocus ? 3 : 1;
+        const colors = this.theme.button;
+        if (this.hasFocus) {
+            ctx.setColors(colors.focused);
+        } else if (this._isMouseOver) {
+            ctx.setColors(colors.hover);
+        } else {
+            ctx.setColors(colors.normal);
+        }
+
         ctx.moveTo(0, 0);
         ctx.print(`[ ${this._text} ]`);
     }
