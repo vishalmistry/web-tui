@@ -5,17 +5,17 @@ export interface Color {
 }
 
 export class Palette {
-    public static readonly dos = new Palette([
+    public static readonly dos = new Palette('dos', [
         '#000000', '#0000aa', '#00aa00', '#00aaaa', '#aa0000', '#aa00aa', '#aa5500', '#aaaaaa',
         '#555555', '#5555ff', '#55ff55', '#55ffff', '#ff5555', '#ff55ff', '#ffff55', '#ffffff',
     ].map((c) => Palette.parseColor(c) || { r: 0, g: 0, b: 0 }), 7, 0);
 
-    public static readonly xterm = new Palette([
+    public static readonly xterm = new Palette('xterm', [
         '#000000', '#800000', '#008000', '#808000', '#000080', '#800080', '#008080', '#c0c0c0',
         '#808080', '#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff', '#ffffff',
     ].map((c) => Palette.parseColor(c) || { r: 0, g: 0, b: 0 }), 7, 0);
 
-    public static readonly xterm256 = new Palette([
+    public static readonly xterm256 = new Palette('xterm-256color', [
         // Primary
         '#000000', '#800000', '#008000', '#808000', '#000080', '#800080', '#008080', '#c0c0c0',
         '#808080', '#ff0000', '#00ff00', '#ffff00', '#0000ff', '#ff00ff', '#00ffff', '#ffffff',
@@ -66,9 +66,14 @@ export class Palette {
     ].map((c) => Palette.parseColor(c) || { r: 0, g: 0, b: 0 }), 7, 0);
 
     private constructor(
+        private _name: string,
         private _colors: Color[],
         private _defaultForegroundCode: number,
         private _defaultBackgroundCode: number) {
+    }
+
+    public get name() {
+        return this._name;
     }
 
     public get defaultForegroundCode() {
