@@ -155,6 +155,10 @@ export class Application {
                                  guard: (view: View | undefined) => view is View & T,
                                  handler: (view: View & T, args: GUIKeyboardEvent) => void): void {
         let view = this.mainView.focusedView;
+        if (view === undefined) {
+            view = this.mainView;
+        }
+
         while (view !== undefined) {
             if (guard(view)) {
                 const arg = {...event, source: this.mainView.focusedView as View, handled: false };

@@ -72,6 +72,7 @@ export class Screen {
 
     private _isKeyboardEnabled = false;
     private _originalCanvasTabIndex = -1;
+    public captureTabKey = false;
 
     private _isMouseEnabled = false;
     private _originalCanvasCursor: string | null = null;
@@ -375,6 +376,10 @@ export class Screen {
     }
 
     private fireKeyboardEvent(event: KeyboardEvent, screenEventType: ScreenKeyboardEventType, emitter: EventEmitter<ScreenKeyboardEvent>) {
+        if (this.captureTabKey && event.key === 'Tab') {
+            event.preventDefault();
+        }
+
         emitter.emit({
             type: screenEventType,
             key: event.key,

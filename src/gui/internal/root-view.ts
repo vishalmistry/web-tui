@@ -24,23 +24,23 @@ export class RootView extends View implements OnKeyDown {
     }
 
     onKeyDown(event: GUIKeyboardEvent): void {
-        if (event.key === '~') {
-            if (this.focusedView !== undefined) {
-                if (!this.focusedView.focusPrevious()) {
+        if (event.key === 'Tab') {
+            if (event.shiftKey) {
+                if (this.focusedView !== undefined) {
+                    if (!this.focusedView.focusPrevious()) {
+                        this.focusLast();
+                    }
+                } else {
                     this.focusLast();
                 }
             } else {
-                this.focusLast();
-            }
-            return;
-        }
-        if (event.key === '`') {
-            if (this.focusedView !== undefined) {
-                if (!this.focusedView.focusNext()) {
+                if (this.focusedView !== undefined) {
+                    if (!this.focusedView.focusNext()) {
+                        this.focusNext();
+                    }
+                } else {
                     this.focusNext();
                 }
-            } else {
-                this.focusNext();
             }
         }
     }
