@@ -1,14 +1,19 @@
 import { GUIKeyboardEvent, ScreenContext } from '..';
 import { Rect } from '../../common';
+import { Application } from '../application';
 import { DosTheme } from '../dos-theme';
 import { OnKeyDown } from '../interfaces';
 import { View } from '../views';
 
 export class RootView extends View implements OnKeyDown {
-    constructor() {
+    constructor(private _application: Application) {
         super();
 
         this.theme = DosTheme.instance;
+    }
+
+    public get application() {
+        return this._application;
     }
 
     public draw(ctx: ScreenContext, region: Rect) {

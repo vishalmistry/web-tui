@@ -13,4 +13,5 @@ export interface ColorScheme {
 export interface Theme {
     readonly default: ColorScheme;
     readonly button: ColorScheme;
+    readonly checkBox: ColorScheme;
 }

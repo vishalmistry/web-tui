@@ -82,7 +82,6 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
 
     public onKeyPress(event: GUIKeyboardEvent) {
         if (event.source !== this) {
-            console.log(event.source);
             return;
         }
         this.lastKey = event.key;

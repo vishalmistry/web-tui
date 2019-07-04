@@ -1,7 +1,7 @@
 import { Rect } from './common';
 import { Application } from './gui/application';
 import { Dimension, Position } from './gui/layout';
-import { Button, GroupBox } from './gui/views';
+import { Button, CheckBox, Frame } from './gui/views';
 import { Border } from './gui/views/border';
 import { Screen } from './screen/screen';
 
@@ -12,6 +12,7 @@ const screen = new Screen(app);
 screen.isResizable = true;
 screen.isMouseEnabled = true;
 screen.isKeyboardEnabled = true;
+screen.captureTabKey = true;
 screen.isCursorVisible = true;
 
 const application = new Application(screen);
@@ -29,11 +30,12 @@ border1.width = Dimension.percent(30);
 border1.background = 7;
 mainView.addChild(border1);
 
-const groupBox = new GroupBox('Box');
+const groupBox = new Frame('abcde');
 groupBox.x = Position.at(1);
 groupBox.y = Position.end();
-groupBox.width = Dimension.percent(40);
+groupBox.width = Dimension.sized(6);
 groupBox.height = Dimension.sized(6);
+groupBox.headerPosition = 'right';
 border1.addChild(groupBox);
 
 const innerBorder2 = new Border();
@@ -71,11 +73,24 @@ button.clicked.subscribe(() => {
     groupBox.height = Dimension.percent(80);
     } else if (i === 5) {
         border1.y = Position.end();
+        groupBox.headerPosition = 'right';
+    } else if (i === 6) {
+        groupBox.headerPosition = 'center';
+        groupBox.frameStyle = 'double';
     } else {
         border1.x = border1.x === undefined ? Position.at(0) : border1.x.add(1);
     }
 });
 groupBox.addChild(button);
+
+const checkBox = new CheckBox('Check Me');
+checkBox.x = Position.center();
+checkBox.y = Position.bottomOf(button).add(1);
+checkBox.checkChanged.subscribe((args) => {
+    const cb = args.source as CheckBox;
+    cb.text = cb.isChecked ? 'Uncheck Me' : 'Check Me';
+});
+groupBox.addChild(checkBox);
 
 application.start();
 

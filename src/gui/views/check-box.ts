@@ -51,7 +51,7 @@ export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, 
     }
 
     public draw(ctx: ScreenContext, _region: Rect) {
-        const colors = this.theme.button;
+        const colors = this.theme.checkBox;
         if (this.hasFocus) {
             ctx.setColors(colors.focused);
         } else if (this._isMouseOver) {
@@ -62,8 +62,6 @@ export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, 
 
         ctx.moveTo(0, 0);
         ctx.print(`[${this._isChecked ? 'x' : ' '}]`);
-
-        ctx.setColors(colors.normal);
         ctx.print(` ${this._text}`);
     }
 
@@ -90,7 +88,7 @@ export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, 
     }
 
     onKeyPress(event: GUIKeyboardEvent): void {
-        if (event.key !== ' ' && event.key !== 'Enter') {
+        if (event.key !== ' ') {
             return;
         }
         this.toggleChecked();

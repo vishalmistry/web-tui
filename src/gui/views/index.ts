@@ -1,3 +1,4 @@
 export * from './view';
+export * from './frame';
 export * from './button';
-export * from './group-box';
+export * from './check-box';

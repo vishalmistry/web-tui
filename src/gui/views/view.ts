@@ -1,5 +1,6 @@
 import { ScreenContext } from '..';
 import { EventEmitter, Graph, Rect } from '../../common';
+import { Application } from '../application';
 import { Dimension, Position } from '../layout';
 import { Theme } from '../theme';
 
@@ -34,6 +35,13 @@ export class View {
             this._frame = frame;
             this._bounds = new Rect(0, 0, frame.width, frame.height);
         }
+    }
+
+    public get application(): Application {
+        if (this.parent === undefined) {
+            throw new Error('View is not part of an application');
+        }
+        return this.parent.application;
     }
 
     public get parent(): View | undefined {

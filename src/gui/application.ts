@@ -21,7 +21,7 @@ import { RootView } from './internal/root-view';
 export class Application {
     private static readonly REDRAW_FREQ = 60;
 
-    public readonly mainView = new RootView();
+    public readonly mainView: View = new RootView(this);
 
     private _invalidatedRegion: Rect | undefined;
     private _redrawScheduled = false;
