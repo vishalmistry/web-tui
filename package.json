@@ -1,15 +1,14 @@
 {
-  "name": "lss2000",
-  "version": "1.0.0",
-  "description": "",
+  "name": "web-tui",
+  "description": "Components to build Text User Interfaces in a browser",
+  "version": "0.1.0",
+  "author": "Vishal Mistry",
+  "license": "MIT",
   "main": "src/index.ts",
   "scripts": {
     "build": "webpack",
-    "lint": "tslint --project .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "lint": "tslint --project ."
   },
-  "author": "Vishal Mistry",
-  "license": "ISC",
   "devDependencies": {
     "ts-loader": "^5.3.3",
     "tslint": "^5.15.0",
