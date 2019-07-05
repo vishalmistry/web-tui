@@ -1,8 +1,16 @@
-import { View } from '.';
 import { ScreenContext } from '..';
 import { EventEmitter, Rect } from '../../common';
-import { GUIKeyboardEvent, OnClick, OnKeyPress, OnMouseDown, OnMouseEnter, OnMouseLeave, ViewEvent } from '../interfaces';
+import {
+    OnClick,
+    OnKeyPress,
+    OnMouseDown,
+    OnMouseEnter,
+    OnMouseLeave,
+    TUIKeyboardEvent,
+    ViewEvent,
+} from '../interfaces';
 import { Dimension } from '../layout';
+import { View } from '../views';
 
 export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave {
 
@@ -73,7 +81,7 @@ export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, On
         this.fireClickedEvent();
     }
 
-    onKeyPress(event: GUIKeyboardEvent): void {
+    onKeyPress(event: TUIKeyboardEvent): void {
         if (event.key !== 'Enter') {
             return;
         }

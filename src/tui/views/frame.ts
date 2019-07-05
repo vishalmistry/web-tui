@@ -1,7 +1,7 @@
-import { View } from '.';
 import { Rect } from '../../common';
 import { Dimension, Position } from '../layout';
 import { ScreenContext } from '../screen-context';
+import { View } from '../views';
 
 type HeaderPosition = 'left' | 'center' | 'right';
 type FrameStyle = 'single' | 'double';
@@ -68,6 +68,16 @@ export class Frame extends View {
     }
 
     public draw(ctx: ScreenContext, region: Rect) {
+        const colors = this.theme.default;
+        ctx.setColors(colors.normal);
+
+        for (let y = region.top; y < region.bottom; y++) {
+            for (let x = region.left; x < region.right; x++) {
+                ctx.moveTo(x, y);
+                ctx.setCharacter(' ');
+            }
+        }
+
         ctx.drawFrame(this.bounds, this._frameStyle);
 
         const availableSpace = Math.max(0, this.bounds.width - 4);

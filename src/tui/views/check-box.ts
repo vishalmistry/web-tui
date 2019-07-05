@@ -1,8 +1,16 @@
-import { View } from '.';
-import { GUIMouseEvent, ScreenContext } from '..';
+import { ScreenContext, TUIMouseEvent } from '..';
 import { EventEmitter, Rect } from '../../common';
-import { GUIKeyboardEvent, OnClick, OnKeyPress, OnMouseDown, OnMouseEnter, OnMouseLeave, ValueChangedEvent } from '../interfaces';
+import {
+    OnClick,
+    OnKeyPress,
+    OnMouseDown,
+    OnMouseEnter,
+    OnMouseLeave,
+    TUIKeyboardEvent,
+    ValueChangedEvent,
+} from '../interfaces';
 import { Dimension } from '../layout';
+import { View } from '../views';
 
 export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave {
 
@@ -83,11 +91,11 @@ export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, 
         this.hasFocus = true;
     }
 
-    onClick(_event: GUIMouseEvent): void {
+    onClick(_event: TUIMouseEvent): void {
         this.toggleChecked();
     }
 
-    onKeyPress(event: GUIKeyboardEvent): void {
+    onKeyPress(event: TUIKeyboardEvent): void {
         if (event.key !== ' ') {
             return;
         }

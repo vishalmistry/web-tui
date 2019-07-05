@@ -1,6 +1,4 @@
 import {
-    GUIKeyboardEvent,
-    GUIMouseEvent,
     hasClickHandler,
     hasDoubleClickHandler,
     hasKeyDownHandler,
@@ -12,6 +10,8 @@ import {
     hasMouseMoveHandler,
     hasMouseUpHandler,
     ScreenContext,
+    TUIKeyboardEvent,
+    TUIMouseEvent,
     View,
 } from '.';
 import { Rect } from '../common';
@@ -153,7 +153,7 @@ export class Application {
 
     private fireKeyboardEvent<T>(event: ScreenKeyboardEvent,
                                  guard: (view: View | undefined) => view is View & T,
-                                 handler: (view: View & T, args: GUIKeyboardEvent) => void): void {
+                                 handler: (view: View & T, args: TUIKeyboardEvent) => void): void {
         let view = this.mainView.focusedView;
         if (view === undefined) {
             view = this.mainView;
@@ -174,7 +174,7 @@ export class Application {
     private fireMouseEvent<T>(event: ScreenMouseEvent,
                               target: { view: View | undefined, x: number, y: number },
                               guard: (view: View | undefined) => view is View & T,
-                              handler: (view: View & T, args: GUIMouseEvent) => void): void {
+                              handler: (view: View & T, args: TUIMouseEvent) => void): void {
         let view = target.view;
         let viewX = target.x;
         let viewY = target.y;

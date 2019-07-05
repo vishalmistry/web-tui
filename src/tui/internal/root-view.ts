@@ -1,4 +1,4 @@
-import { GUIKeyboardEvent, ScreenContext } from '..';
+import { ScreenContext, TUIKeyboardEvent } from '..';
 import { Rect } from '../../common';
 import { Application } from '../application';
 import { DosTheme } from '../dos-theme';
@@ -28,7 +28,7 @@ export class RootView extends View implements OnKeyDown {
         super.draw(ctx, region);
     }
 
-    onKeyDown(event: GUIKeyboardEvent): void {
+    onKeyDown(event: TUIKeyboardEvent): void {
         if (event.key === 'Tab') {
             if (event.shiftKey) {
                 if (this.focusedView !== undefined) {

@@ -1,6 +1,6 @@
-import { GUIMouseEvent, OnKeyPress, View } from '..';
+import { OnKeyPress, TUIMouseEvent, View } from '..';
 import { Rect } from '../../common';
-import { GUIKeyboardEvent, OnClick, OnDoubleClick } from '../interfaces';
+import { OnClick, OnDoubleClick, TUIKeyboardEvent } from '../interfaces';
 import { ScreenContext } from '../screen-context';
 
 export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
@@ -46,7 +46,7 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
         super.draw(ctx, region);
     }
 
-    public onClick(event: GUIMouseEvent) {
+    public onClick(event: TUIMouseEvent) {
         if (event.source !== this) {
             return;
         }
@@ -59,7 +59,7 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
         }
     }
 
-    public onDoubleClick(event: GUIMouseEvent) {
+    public onDoubleClick(event: TUIMouseEvent) {
         if (event.source !== this) {
             return;
         }
@@ -80,7 +80,7 @@ export class Border extends View implements OnClick, OnKeyPress, OnDoubleClick {
         this._mainView.addChild(this.createdView);
     }
 
-    public onKeyPress(event: GUIKeyboardEvent) {
+    public onKeyPress(event: TUIKeyboardEvent) {
         if (event.source !== this) {
             return;
         }

@@ -14,5 +14,5 @@ export enum DosColors {
     brightRed = 12,
     brightMagenta = 13,
     brightYellow = 14,
-    brightWhite = 15
+    brightWhite = 15,
 }
