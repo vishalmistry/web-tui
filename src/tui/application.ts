@@ -160,7 +160,7 @@ export class Application {
         }
 
         while (view !== undefined) {
-            if (guard(view)) {
+            if (view.isEnabled && guard(view)) {
                 const arg = {...event, source: this.mainView.focusedView as View, handled: false };
                 handler(view, arg);
                 if (arg.handled) {
@@ -179,7 +179,7 @@ export class Application {
         let viewX = target.x;
         let viewY = target.y;
         while (view !== undefined) {
-            if (guard(view)) {
+            if (view.isEnabled && guard(view)) {
                 const arg = {
                     ...event,
                     source: target.view as View,

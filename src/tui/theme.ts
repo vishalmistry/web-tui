@@ -1,17 +1,17 @@
-
 export interface Colors {
     readonly foreground: number;
     readonly background: number;
 }
 
-export interface ColorScheme {
+export interface SimpleColorScheme {
     readonly normal: Colors;
     readonly hover: Colors;
     readonly focused: Colors;
+    readonly disabled: Colors;
 }
 
 export interface Theme {
-    readonly default: ColorScheme;
-    readonly button: ColorScheme;
-    readonly checkBox: ColorScheme;
+    readonly default: SimpleColorScheme;
+    readonly button: SimpleColorScheme;
+    readonly checkBox: SimpleColorScheme;
 }

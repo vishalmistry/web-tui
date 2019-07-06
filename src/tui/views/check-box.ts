@@ -60,7 +60,9 @@ export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, 
 
     public draw(ctx: ScreenContext, _region: Rect) {
         const colors = this.theme.checkBox;
-        if (this.hasFocus) {
+        if (!this.isEnabled) {
+            ctx.setColors(colors.disabled);
+        } else if (this.hasFocus) {
             ctx.setColors(colors.focused);
         } else if (this._isMouseOver) {
             ctx.setColors(colors.hover);

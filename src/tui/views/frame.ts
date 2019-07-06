@@ -69,7 +69,7 @@ export class Frame extends View {
 
     public draw(ctx: ScreenContext, region: Rect) {
         const colors = this.theme.default;
-        ctx.setColors(colors.normal);
+        ctx.setColors(this.isEnabled ? colors.normal : colors.disabled);
 
         for (let y = region.top; y < region.bottom; y++) {
             for (let x = region.left; x < region.right; x++) {

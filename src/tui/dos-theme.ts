@@ -6,18 +6,23 @@ export class DosTheme implements Theme {
 
     default = {
         normal: { background: DosColors.blue, foreground: DosColors.brightWhite },
-        hover: { background: DosColors.blue, foreground: DosColors.brightWhite },
-        focused: { background: DosColors.blue, foreground: DosColors.brightWhite },
+        hover: { background: DosColors.darkGrey, foreground: DosColors.brightYellow },
+        focused: { background: DosColors.cyan, foreground: DosColors.brightWhite },
+        disabled: { background: DosColors.blue, foreground: DosColors.grey },
     };
+
     button = {
-        normal: { background: DosColors.blue, foreground: DosColors.brightWhite },
-        hover: { background: DosColors.cyan, foreground: DosColors.brightWhite },
-        focused: { background: DosColors.cyan, foreground: DosColors.brightWhite },
+        normal: { ...this.default.normal },
+        hover: { ...this.default.hover },
+        focused: { ...this.default.focused },
+        disabled: { ...this.default.disabled },
     };
+
     checkBox = {
-        normal: { background: DosColors.blue, foreground: DosColors.brightWhite },
-        hover: { background: DosColors.cyan, foreground: DosColors.brightWhite },
-        focused: { background: DosColors.cyan, foreground: DosColors.brightWhite },
+        normal: { ...this.default.normal },
+        hover: { ...this.default.hover },
+        focused: { ...this.default.focused },
+        disabled: { ...this.default.disabled },
     };
 
     private constructor() {

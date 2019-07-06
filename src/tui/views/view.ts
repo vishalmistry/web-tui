@@ -15,6 +15,7 @@ export class View {
     private _hasFocus = false;
     private _focusedChild?: View = undefined;
     private _theme?: Theme;
+    private _isEnabled?: boolean;
     private _bounds: Rect;
 
     // Layout
@@ -192,6 +193,27 @@ export class View {
             this.parent.setFocusedChild(value ? this : undefined);
         }
 
+        this.invalidate();
+    }
+
+    public get isEnabled(): boolean {
+        if (this.parent !== undefined && !this.parent.isEnabled) {
+            return false;
+        }
+
+        if (this._isEnabled !== undefined) {
+            return this._isEnabled;
+        }
+
+        return true;
+    }
+
+    public set isEnabled(value: boolean) {
+        if (this._isEnabled === value) {
+            return;
+        }
+
+        this._isEnabled = value;
         this.invalidate();
     }
 
@@ -382,7 +404,7 @@ export class View {
 
         for (let i = (childIdx + 1); i < this.children.length; i++) {
             const child = this.children[i];
-            if (child.canFocus) {
+            if (child.isEnabled && child.canFocus) {
                 child.hasFocus = true;
                 return true;
             }
@@ -431,7 +453,7 @@ export class View {
             }
         }
 
-        if (this.canFocus) {
+        if (this.isEnabled && this.canFocus) {
             this.hasFocus = true;
             return true;
         }
