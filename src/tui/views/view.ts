@@ -70,6 +70,7 @@ export class View {
 
     public set theme(value: Theme) {
         this._theme = value;
+        this.invalidate();
     }
 
     public get layoutMode(): LayoutMode {

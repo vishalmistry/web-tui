@@ -53,7 +53,6 @@ export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, 
         if (this._isChecked === value) {
             return;
         }
-
         this._isChecked = value;
         this.invalidate(new Rect(1, 0, 1, 1));
     }

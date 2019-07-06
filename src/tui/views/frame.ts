@@ -30,7 +30,6 @@ export class Frame extends View {
         if (this._header === value) {
             return;
         }
-
         this._header = value;
         this.invalidate(new Rect(2, 0, this.bounds.width - 4, 1));
     }
@@ -97,7 +96,7 @@ export class Frame extends View {
                     const start = Math.floor((header.length - availableSpace) / 2);
                     header = header.substr(start, availableSpace);
                 } else {
-                    x = Math.round((availableSpace - header.length) / 2);
+                    x = Math.floor((availableSpace - header.length) / 2);
                 }
 
                 ctx.moveTo(x + 1, 0);
