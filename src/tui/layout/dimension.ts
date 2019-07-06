@@ -81,7 +81,7 @@ class AbsoluteDimension extends Dimension {
     }
 
     absoluteValue(_max: number): number {
-        return this._value;
+        return Math.round(this._value);
     }
 
     equal(other: Dimension): boolean {

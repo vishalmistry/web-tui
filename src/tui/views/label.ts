@@ -51,7 +51,7 @@ export class Label extends View {
 
         this._autoSize = value;
         if (this._autoSize) {
-            this.invalidate();
+            this.resizeToText();
         }
     }
 

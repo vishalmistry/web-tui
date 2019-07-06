@@ -93,7 +93,7 @@ class AbsolutePosition extends Position {
     }
 
     absoluteValue(_max: number): number {
-        return this._value;
+        return Math.round(this._value);
     }
 
     equal(other: Position): boolean {
