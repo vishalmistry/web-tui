@@ -36,6 +36,10 @@ export function centerString(text: string, width: number, padChar = ' '): string
 export function justifyString(text: string, width: number, padChar = ' '): string {
     if (width > text.length) {
         const words = text.split(' ').filter((w) => w.length > 0);
+        if (words.length === 1) {
+            return leftAlignString(words[0], width, padChar);
+        }
+
         const charCount = words.map((w) => w.length).reduce((p, c) => p + c);
         const remainingSpace = width - charCount;
         const gaps = words.length - 1;
