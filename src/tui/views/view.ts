@@ -112,11 +112,12 @@ export class View {
         this.invalidate();
     }
 
-    public get x(): Position | undefined {
+    public get x(): Position | number | string | undefined {
         return this._x;
     }
 
-    public set x(value: Position | undefined) {
+    public set x(value: Position | number | string | undefined) {
+        value = value !== undefined ? Position.from(value) : undefined;
         if (Position.equal(this._x, value)) {
             return;
         }
@@ -125,11 +126,12 @@ export class View {
         this.invalidateLayout();
     }
 
-    public get y(): Position | undefined {
+    public get y(): Position | number | string | undefined {
         return this._y;
     }
 
-    public set y(value: Position | undefined) {
+    public set y(value: Position | number | string | undefined) {
+        value = value !== undefined ? Position.from(value) : undefined;
         if (Position.equal(this._y, value)) {
             return;
         }
@@ -138,11 +140,12 @@ export class View {
         this.invalidateLayout();
     }
 
-    public get width(): Dimension | undefined {
+    public get width(): Dimension | number | string | undefined {
         return this._width;
     }
 
-    public set width(value: Dimension | undefined) {
+    public set width(value: Dimension | number | string | undefined) {
+        value = value !== undefined ? Dimension.from(value) : undefined;
         if (Dimension.equal(this._width, value)) {
             return;
         }
@@ -151,11 +154,12 @@ export class View {
         this.invalidateLayout();
     }
 
-    public get height(): Dimension | undefined {
+    public get height(): Dimension | number | string | undefined {
         return this._height;
     }
 
-    public set height(value: Dimension | undefined) {
+    public set height(value: Dimension | number | string | undefined) {
+        value = value !== undefined ? Dimension.from(value) : undefined;
         if (Dimension.equal(this._height, value)) {
             return;
         }
@@ -304,28 +308,28 @@ export class View {
 
         let [x, y, width, height] = [0, 0, 0, 0];
 
-        if (this.x !== undefined && this.x.needsSize &&
-            this.width !== undefined && this.width.needsPosition) {
-            x = this.x.absoluteValue(hostRect.width, hostRect.width);
-            width = this.width.absoluteValue(hostRect.width, 0);
-        } else if (this.x !== undefined && this.x.needsSize) {
-            width = this.width === undefined ? hostRect.width : this.width.absoluteValue(hostRect.width);
-            x = this.x.absoluteValue(hostRect.width, width);
+        if (this._x !== undefined && this._x.needsSize &&
+            this._width !== undefined && this._width.needsPosition) {
+            x = this._x.absoluteValue(hostRect.width, hostRect.width);
+            width = this._width.absoluteValue(hostRect.width, 0);
+        } else if (this._x !== undefined && this._x.needsSize) {
+            width = this._width === undefined ? hostRect.width : this._width.absoluteValue(hostRect.width);
+            x = this._x.absoluteValue(hostRect.width, width);
         } else {
-            x = this.x === undefined ? 0 : this.x.absoluteValue(hostRect.width);
-            width = this.width === undefined ? hostRect.width : this.width.absoluteValue(hostRect.width, x);
+            x = this._x === undefined ? 0 : this._x.absoluteValue(hostRect.width);
+            width = this._width === undefined ? hostRect.width : this._width.absoluteValue(hostRect.width, x);
         }
 
-        if (this.y !== undefined && this.y.needsSize &&
-            this.height !== undefined && this.height.needsPosition) {
-            y = this.y.absoluteValue(hostRect.height, hostRect.height);
-            height = this.height.absoluteValue(hostRect.height, 0);
-        } else if (this.y !== undefined && this.y.needsSize) {
-            height = this.height === undefined ? hostRect.height : this.height.absoluteValue(hostRect.height);
-            y = this.y.absoluteValue(hostRect.height, height);
+        if (this._y !== undefined && this._y.needsSize &&
+            this._height !== undefined && this._height.needsPosition) {
+            y = this._y.absoluteValue(hostRect.height, hostRect.height);
+            height = this._height.absoluteValue(hostRect.height, 0);
+        } else if (this._y !== undefined && this._y.needsSize) {
+            height = this._height === undefined ? hostRect.height : this._height.absoluteValue(hostRect.height);
+            y = this._y.absoluteValue(hostRect.height, height);
         } else {
-            y = this.y === undefined ? 0 : this.y.absoluteValue(hostRect.height);
-            height = this.height === undefined ? hostRect.height : this.height.absoluteValue(hostRect.height, y);
+            y = this._y === undefined ? 0 : this._y.absoluteValue(hostRect.height);
+            height = this._height === undefined ? hostRect.height : this._height.absoluteValue(hostRect.height, y);
         }
 
         this.frame = new Rect(x, y, width, height);
@@ -340,23 +344,23 @@ export class View {
         for (const view of this.children) {
             g.addNode(view);
 
-            if (view.x !== undefined) {
-                for (const v of view.x.dependencies) {
+            if (view._x !== undefined) {
+                for (const v of view._x.dependencies) {
                     g.addEdge(v, view);
                 }
             }
-            if (view.y !== undefined) {
-                for (const v of view.y.dependencies) {
+            if (view._y !== undefined) {
+                for (const v of view._y.dependencies) {
                     g.addEdge(v, view);
                 }
             }
-            if (view.width !== undefined) {
-                for (const v of view.width.dependencies) {
+            if (view._width !== undefined) {
+                for (const v of view._width.dependencies) {
                     g.addEdge(v, view);
                 }
             }
-            if (view.height !== undefined) {
-                for (const v of view.height.dependencies) {
+            if (view._height !== undefined) {
+                for (const v of view._height.dependencies) {
                     g.addEdge(v, view);
                 }
             }
