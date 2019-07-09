@@ -17,8 +17,8 @@ export class RootView extends View implements OnKeyDown {
     }
 
     public draw(ctx: ScreenContext, region: Rect) {
-        ctx.background = 0;
-        ctx.foreground = 7;
+        ctx.background = ctx.palette.defaultBackgroundCode;
+        ctx.foreground = ctx.palette.defaultForegroundCode;
         for (let y = region.top; y < region.bottom; y++) {
             for (let x = region.left; x < region.right; x++) {
                 ctx.moveTo(x, y);
