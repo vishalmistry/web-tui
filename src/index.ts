@@ -1,6 +1,7 @@
 import { Screen } from './screen';
 import {
     Application,
+    Button,
     CheckBox,
     Dimension,
     Frame,
@@ -50,9 +51,22 @@ checkBox.y = Position.bottomOf(label).add(1);
 mainControls.addChild(checkBox);
 
 const radioGroup = new RadioGroup(['Item One', 'Item Two', 'Item Three']);
-radioGroup.x = Position.leftOf(label);
-radioGroup.y = Position.bottomOf(checkBox).add(1);
+radioGroup.x = Position.leftOf(label).add(2);
+radioGroup.y = Position.bottomOf(checkBox).add(3);
+
+const radioFrame = new Frame('Pick an item');
+radioFrame.x = Position.leftOf(label);
+radioFrame.y = Position.bottomOf(checkBox).add(1);
+radioFrame.width = Dimension.widthOf(radioGroup).add(4);
+radioFrame.height = Dimension.heightOf(radioGroup).add(4);
+
+mainControls.addChild(radioFrame);
 mainControls.addChild(radioGroup);
+
+const button = new Button('Press me!');
+button.x = 1;
+button.y = Position.end().subtract(1);
+mainControls.addChild(button);
 
 enabledCheckbox.checkChanged.subscribe((event) => {
     mainControls.isEnabled = event.newValue;
@@ -69,6 +83,10 @@ checkBox.checkChanged.subscribe((event) => {
 
 radioGroup.selectionChanged.subscribe((event) => {
     label.text = `You selected '${radioGroup.items[event.newValue]}'.`;
+});
+
+button.clicked.subscribe(() => {
+    label.text = 'You pressed the button.';
 });
 
 application.mainView.addChild(rootFrame);
