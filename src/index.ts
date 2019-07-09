@@ -1,9 +1,13 @@
-import { Rect } from './common';
-import { Application } from './gui/application';
-import { Dimension, Position } from './gui/layout';
-import { Button, CheckBox, Frame } from './gui/views';
-import { Border } from './gui/views/border';
-import { Screen } from './screen/screen';
+import { Screen } from './screen';
+import {
+    Application,
+    CheckBox,
+    Dimension,
+    Frame,
+    Label,
+    Position,
+    RadioGroup,
+} from './tui';
 
 const app = document.getElementById('app') as HTMLDivElement;
 
@@ -16,133 +20,56 @@ screen.captureTabKey = true;
 screen.isCursorVisible = true;
 
 const application = new Application(screen);
-const mainView = application.mainView;
 
-const border2 = new Border(new Rect(72, 7, 10, 10));
-border2.background = 1;
-mainView.addChild(border2);
+const rootFrame = new Frame('Demo');
+rootFrame.headerPosition = 'center';
+rootFrame.frameStyle = 'double';
+rootFrame.fill = true;
 
-const border1 = new Border(undefined, mainView);
-border1.x = Position.percent(30);
-border1.y = Position.center();
-border1.height = Dimension.sized(10);
-border1.width = Dimension.percent(30);
-border1.background = 7;
-mainView.addChild(border1);
+const enabledCheckbox = new CheckBox('Enable all the things');
+enabledCheckbox.isChecked = true;
+enabledCheckbox.x = Position.center();
+enabledCheckbox.y = 1;
+rootFrame.addChild(enabledCheckbox);
 
-const groupBox = new Frame('abcde');
-groupBox.x = Position.at(1);
-groupBox.y = Position.end();
-groupBox.width = Dimension.sized(6);
-groupBox.height = Dimension.sized(6);
-groupBox.headerPosition = 'right';
-border1.addChild(groupBox);
+const mainControls = new Frame('');
+mainControls.x = 1;
+mainControls.width = Dimension.fill().subtract(1);
+mainControls.y = Position.bottomOf(enabledCheckbox).add(1);
+mainControls.height = Dimension.fill().subtract(1);
+rootFrame.addChild(mainControls);
 
-const innerBorder2 = new Border();
-innerBorder2.x = Position.rightOf(groupBox).add(2);
-innerBorder2.y = Position.at(2);
-innerBorder2.width = Dimension.widthOf(groupBox);
-innerBorder2.height = Dimension.heightOf(groupBox);
-innerBorder2.background = 3;
-border1.addChild(innerBorder2);
+const label = new Label('Do something with the stuff below');
+label.x = 1;
+label.y = 1;
+mainControls.addChild(label);
 
-const separateBorder = new Border();
-separateBorder.x = Position.rightOf(border1);
-separateBorder.y = Position.bottomOf(border1);
-separateBorder.width = Dimension.sized(4);
-separateBorder.height = Dimension.sized(2);
-separateBorder.background = 3;
-separateBorder.hasFocus = true;
-mainView.addChild(separateBorder);
+const checkBox = new CheckBox('Check me!');
+checkBox.x = Position.leftOf(label);
+checkBox.y = Position.bottomOf(label).add(1);
+mainControls.addChild(checkBox);
 
-let i = 0;
-const button = new Button('Button');
-button.x = Position.center();
-button.y = Position.percent(30);
-button.clicked.subscribe(() => {
-    button.text = `Clicked ${++i}`;
-    screen.moveTo(1, 23);
-    screen.print(button.text);
+const radioGroup = new RadioGroup(['Item One', 'Item Two', 'Item Three']);
+radioGroup.x = Position.leftOf(label);
+radioGroup.y = Position.bottomOf(checkBox).add(1);
+mainControls.addChild(radioGroup);
 
-    if (i === 1) {
-    border1.height = Dimension.from('50%');
+enabledCheckbox.checkChanged.subscribe((event) => {
+    mainControls.isEnabled = event.newValue;
+});
 
-    groupBox.x = Position.percent(10);
-    groupBox.y = Position.center();
-    groupBox.width = Dimension.fill(40);
-    groupBox.height = Dimension.percent(80);
-    } else if (i === 5) {
-        border1.y = Position.end();
-        groupBox.headerPosition = 'right';
-    } else if (i === 6) {
-        groupBox.headerPosition = 'center';
-        groupBox.frameStyle = 'double';
+checkBox.checkChanged.subscribe((event) => {
+    label.text = `You ${event.newValue ? 'checked' : 'unchecked'} the checkbox.`;
+    if (event.newValue) {
+        radioGroup.items = ['Item 1', 'Item 2', 'Item 3'];
     } else {
-        border1.x = border1.x === undefined ? Position.at(0) : border1.x.add(1);
+        radioGroup.items = ['Item One', 'Item Two', 'Item Three'];
     }
 });
-groupBox.addChild(button);
 
-const checkBox = new CheckBox('Check Me');
-checkBox.x = Position.center();
-checkBox.y = Position.bottomOf(button).add(1);
-checkBox.checkChanged.subscribe((args) => {
-    const cb = args.source as CheckBox;
-    cb.text = cb.isChecked ? 'Uncheck Me' : 'Check Me';
+radioGroup.selectionChanged.subscribe((event) => {
+    label.text = `You selected '${radioGroup.items[event.newValue]}'.`;
 });
-groupBox.addChild(checkBox);
 
+application.mainView.addChild(rootFrame);
 application.start();
-
-// screen.print('DMKC');
-
-// screen.mouseMove.subscribe((ev) => {
-//     if (ev.buttons === 1) {
-//         screen.moveTo(ev.position);
-//     }
-//     if (ev.buttons === 2) {
-//         screen.moveTo(ev.position);
-//         screen.setCharacter(219);
-//     }
-// });
-// screen.mouseDown.subscribe((ev) => {
-//     if (ev.position.x === 0 && ev.position.y === 0) {
-//         screen.destroy();
-//         return;
-//     }
-//     if (ev.position.x === 1 && ev.position.y === 0) {
-//         screen.isMouseEnabled = false;
-//         return;
-//     }
-//     if (ev.position.x === 2 && ev.position.y === 0) {
-//         screen.isKeyboardEnabled = !screen.isKeyboardEnabled;
-//         return;
-//     }
-//     if (ev.position.x === 3 && ev.position.y === 0) {
-//         screen.isCursorVisible = !screen.isCursorVisible;
-//         return;
-//     }
-
-//     if (ev.buttons === 1) {
-//         screen.moveTo(ev.position);
-//     }
-
-//     if (ev.buttons === 2) {
-//         screen.moveTo(ev.position);
-//         screen.setCharacter(219);
-//     }
-
-// });
-// screen.keyPress.subscribe((ev) => {
-//     screen.print(ev.key);
-// });
-
-// console.log(`Screen size: ${screen.columns}x${screen.rows}`);
-// const message = ' HELLO WORLD ';
-// screen.foreground = 15;
-// screen.background = 1;
-// screen.moveTo(Math.floor(screen.columns / 2) - Math.floor(message.length / 2), Math.floor(screen.rows / 2));
-// screen.print(message);
-
-// screen.moveTo(screen.columns - 5, screen.rows - 1);
-// screen.print('HELLO WORLD');

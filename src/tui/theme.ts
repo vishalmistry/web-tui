@@ -14,4 +14,5 @@ export interface Theme {
     readonly default: SimpleColorScheme;
     readonly button: SimpleColorScheme;
     readonly checkBox: SimpleColorScheme;
+    readonly radioGroup: SimpleColorScheme;
 }

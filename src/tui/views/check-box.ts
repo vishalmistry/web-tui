@@ -70,8 +70,7 @@ export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, 
         }
 
         ctx.moveTo(0, 0);
-        ctx.print(`[${this._isChecked ? 'x' : ' '}]`);
-        ctx.print(` ${this._text}`);
+        ctx.print(`[${this._isChecked ? 'x' : ' '}] ${this._text}`);
     }
 
     public positionCursor(ctx: ScreenContext) {

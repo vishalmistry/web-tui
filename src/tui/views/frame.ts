@@ -10,6 +10,7 @@ export class Frame extends View {
     private _contentView: View;
     private _headerPosition: HeaderPosition = 'left';
     private _frameStyle: FrameStyle = 'single';
+    private _fill = false;
 
     constructor(private _header: string, frame?: Rect) {
         super(frame);
@@ -58,6 +59,18 @@ export class Frame extends View {
         this.invalidate();
     }
 
+    public get fill() {
+        return this._fill;
+    }
+
+    public set fill(value: boolean) {
+        if (this._fill === value) {
+            return;
+        }
+        this._fill = value;
+        this.invalidate();
+    }
+
     public addChild(view: View) {
         this._contentView.addChild(view);
     }
@@ -70,28 +83,30 @@ export class Frame extends View {
         const colors = this.theme.default;
         ctx.setColors(this.isEnabled ? colors.normal : colors.disabled);
 
-        for (let y = region.top; y < region.bottom; y++) {
-            for (let x = region.left; x < region.right; x++) {
-                ctx.moveTo(x, y);
-                ctx.setCharacter(' ');
+        if (this._fill) {
+            for (let y = region.top; y < region.bottom; y++) {
+                for (let x = region.left; x < region.right; x++) {
+                    ctx.moveTo(x, y);
+                    ctx.setCharacter(' ');
+                }
             }
         }
 
         ctx.drawFrame(this.bounds, this._frameStyle);
 
         const availableSpace = Math.max(0, this.bounds.width - 4);
-        if (this.header.length > 0 && availableSpace > 0) {
-            if (this.headerPosition === 'left') {
-                const header  = this.header.substr(0, availableSpace);
+        if (this._header.length > 0 && availableSpace > 0) {
+            if (this._headerPosition === 'left') {
+                const header  = this._header.substr(0, availableSpace);
                 ctx.moveTo(1, 0);
                 ctx.print(` ${header} `);
-            } else if (this.headerPosition === 'right') {
-                const header  = this.header.substr(Math.max(0, this.header.length - availableSpace));
+            } else if (this._headerPosition === 'right') {
+                const header  = this._header.substr(Math.max(0, this._header.length - availableSpace));
                 ctx.moveTo((this.bounds.width - 3) - header.length, 0);
                 ctx.print(` ${header} `);
-            } else if (this.headerPosition === 'center') {
+            } else if (this._headerPosition === 'center') {
                 let x = 0;
-                let header = this.header;
+                let header = this._header;
                 if (header.length > availableSpace) {
                     const start = Math.floor((header.length - availableSpace) / 2);
                     header = header.substr(start, availableSpace);

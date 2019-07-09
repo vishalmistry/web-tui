@@ -25,6 +25,13 @@ export class DosTheme implements Theme {
         disabled: { ...this.default.disabled },
     };
 
+    radioGroup = {
+        normal: { ...this.default.normal },
+        hover: { ...this.default.hover },
+        focused: { ...this.default.focused },
+        disabled: { ...this.default.disabled },
+    };
+
     private constructor() {
     }
 }
