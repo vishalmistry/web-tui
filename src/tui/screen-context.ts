@@ -4,8 +4,8 @@ import { Palette, Screen } from '../screen';
 import { Colors } from './theme';
 
 export class ScreenContext {
-    private static readonly SINGLE_FRAME_CHARS = '─│┌┐└┘';
-    private static readonly DOUBLE_FRAME_CHARS = '═║╔╗╚╝';
+    private static readonly SINGLE_FRAME_CHARS = [196, 179, 218, 191, 192, 217]; // '─│┌┐└┘';
+    private static readonly DOUBLE_FRAME_CHARS = [205, 186, 201, 187, 200, 188]; // '═║╔╗╚╝';
 
     private _bounds: Rect;
     private _clip!: Rect;
