@@ -1,5 +1,5 @@
 import { ScreenContext } from '..';
-import { EventEmitter, Rect } from '../../common';
+import { centerString, EventEmitter, Rect } from '../../common';
 import {
     OnClick,
     OnKeyPress,
@@ -18,14 +18,10 @@ export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, On
 
     private _isMouseOver = false;
 
-    constructor(private _text: string) {
+    constructor(private _text: string, private _autoSize = true) {
         super();
         this.canFocus = true;
-
-        const width = Button.calculateWidth(_text);
-        this.frame = new Rect(0, 0, width, 1);
-        this.width = Dimension.sized(width);
-        this.height = Dimension.sized(1);
+        this.resizeToText();
     }
 
     public get text() {
@@ -38,11 +34,26 @@ export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, On
         }
 
         this._text = value;
-
-        const width = Button.calculateWidth(this._text);
-        this.frame = this.frame.setSize(width, 1);
-        this.width = Dimension.sized(width);
         this.invalidate();
+
+        if (this._autoSize) {
+            this.resizeToText();
+        }
+    }
+
+    public get autoSize() {
+        return this._autoSize;
+    }
+
+    public set autoSize(value: boolean) {
+        if (this._autoSize === value) {
+            return;
+        }
+
+        this._autoSize = value;
+        if (this._autoSize) {
+            this.resizeToText();
+        }
     }
 
     public draw(ctx: ScreenContext, _region: Rect) {
@@ -58,11 +69,18 @@ export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, On
         }
 
         ctx.moveTo(0, 0);
-        ctx.print(`[ ${this._text} ]`);
+        ctx.print(`[${centerString(this._text, this.bounds.width - 2)}]`);
     }
 
     public positionCursor(ctx: ScreenContext) {
         ctx.moveTo(2, 0);
+    }
+
+    public resizeToText() {
+        const width = Button.calculateWidth(this._text);
+        this.frame = this.frame.setSize(width, 1);
+        this.width = Dimension.sized(width);
+        this.height = Dimension.sized(1);
     }
 
     onMouseEnter(): void {

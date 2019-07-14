@@ -96,6 +96,10 @@ export class RadioGroup extends View implements OnMouseDown, OnMouseUp, OnKeyPre
 
     onMouseDown(event: TUIMouseEvent): void {
         const targetItemIndex = this.getItemIndexAtPosition(event.x, event.y);
+        if (targetItemIndex < 0) {
+            return;
+        }
+
         if (targetItemIndex !== this._focusedIndex) {
             this._focusedIndex = targetItemIndex;
             this.invalidate();

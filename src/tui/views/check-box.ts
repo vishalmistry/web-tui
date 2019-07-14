@@ -21,11 +21,7 @@ export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, 
     constructor(private _text: string, private _isChecked = false) {
         super();
         this.canFocus = true;
-
-        const width = CheckBox.calculateWidth(_text);
-        this.frame = new Rect(0, 0, width, 1);
-        this.width = Dimension.sized(width);
-        this.height = Dimension.sized(1);
+        this.resizeToText();
     }
 
     public get text() {
@@ -38,11 +34,8 @@ export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, 
         }
 
         this._text = value;
-
-        const width = CheckBox.calculateWidth(this._text);
-        this.frame = this.frame.setSize(width, 1);
-        this.width = Dimension.sized(width);
         this.invalidate(new Rect(4, 0, this.text.length, 1));
+        this.resizeToText();
     }
 
     public get isChecked() {
@@ -105,6 +98,13 @@ export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, 
     private toggleChecked() {
         this.isChecked = !this.isChecked;
         this.checkChanged.emit({ source: this, previousValue: !this.isChecked, newValue: this.isChecked });
+    }
+
+    private resizeToText() {
+        const width = CheckBox.calculateWidth(this._text);
+        this.frame = this.frame.setSize(width, 1);
+        this.width = Dimension.sized(width);
+        this.height = Dimension.sized(1);
     }
 
     private static calculateWidth(text: string) {
