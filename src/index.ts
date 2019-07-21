@@ -8,6 +8,7 @@ import {
     Label,
     Position,
     RadioGroup,
+    TextBox,
 } from './tui';
 
 const app = document.getElementById('app') as HTMLDivElement;
@@ -63,6 +64,28 @@ radioFrame.height = Dimension.heightOf(radioGroup).add(4);
 mainControls.addChild(radioFrame);
 mainControls.addChild(radioGroup);
 
+const usernameLabel = new Label('Username: ');
+usernameLabel.x = Position.leftOf(label);
+usernameLabel.y = Position.bottomOf(radioFrame).add(1);
+mainControls.addChild(usernameLabel);
+
+const username = new TextBox('guest');
+username.x = Position.rightOf(usernameLabel);
+username.y = Position.topOf(usernameLabel);
+username.width = '10%';
+mainControls.addChild(username);
+
+const passwordLabel = new Label('Password: ');
+passwordLabel.x = Position.leftOf(label);
+passwordLabel.y = Position.bottomOf(usernameLabel).add(1);
+mainControls.addChild(passwordLabel);
+
+const password = new TextBox('', true);
+password.x = Position.rightOf(passwordLabel);
+password.y = Position.topOf(passwordLabel);
+password.width = '10%';
+mainControls.addChild(password);
+
 const button = new Button('Press me!');
 button.x = 1;
 button.y = Position.end().subtract(1);
@@ -83,6 +106,14 @@ checkBox.checkChanged.subscribe((event) => {
 
 radioGroup.selectionChanged.subscribe((event) => {
     label.text = `You selected '${radioGroup.items[event.newValue]}'.`;
+});
+
+username.textChanged.subscribe((event) => {
+    label.text = `You changed the user name to '${event.newValue}'`;
+});
+
+password.textChanged.subscribe((event) => {
+    label.text = `You changed the password to '${event.newValue}'`;
 });
 
 button.clicked.subscribe(() => {

@@ -13,7 +13,6 @@ import { Dimension } from '../layout';
 import { View } from '../views';
 
 export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave {
-
     public clicked = new EventEmitter<ViewEvent>();
 
     private _isMouseOver = false;

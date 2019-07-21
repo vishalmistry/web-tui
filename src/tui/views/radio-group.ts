@@ -15,6 +15,7 @@ import { View } from '../views';
 
 export class RadioGroup extends View implements OnMouseDown, OnMouseUp, OnKeyPress, OnKeyDown, OnMouseLeave, OnMouseMove {
     public selectionChanged = new EventEmitter<ValueChangedEvent<number>>();
+
     private _mouseOverIndex = -1;
     private _mouseDownIndex = -1;
     private _focusedIndex = 0;

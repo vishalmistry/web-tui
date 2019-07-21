@@ -1,4 +1,4 @@
-function repeatStr(s: string, count: number) {
+export function repeatString(s: string, count: number) {
     let result = '';
     for (let i = 0; i < count; i++) {
         result = result + s;
@@ -8,7 +8,7 @@ function repeatStr(s: string, count: number) {
 
 export function leftAlignString(text: string, width: number, padChar = ' '): string {
     if (width > text.length) {
-        return text + repeatStr(padChar, width - text.length);
+        return text + repeatString(padChar, width - text.length);
     } else {
         return text.substr(0, width);
     }
@@ -16,7 +16,7 @@ export function leftAlignString(text: string, width: number, padChar = ' '): str
 
 export function rightAlignString(text: string, width: number, padChar = ' '): string {
     if (width > text.length) {
-        return repeatStr(padChar, width - text.length) + text;
+        return repeatString(padChar, width - text.length) + text;
     } else {
         return text.substr(Math.max(0, text.length - width));
     }
@@ -26,7 +26,7 @@ export function centerString(text: string, width: number, padChar = ' '): string
     if (width > text.length) {
         const padLeft = Math.floor((width - text.length) / 2);
         const padRight = width - padLeft - text.length;
-        return repeatStr(padChar, padLeft) + text + repeatStr(padChar, padRight);
+        return repeatString(padChar, padLeft) + text + repeatString(padChar, padRight);
     } else {
         const start = Math.floor((text.length - width) / 2);
         return text.substr(start, width);
@@ -56,7 +56,7 @@ export function justifyString(text: string, width: number, padChar = ' '): strin
                 padding = 0;
             }
 
-            result = result + words[i] + repeatStr(padChar, padding);
+            result = result + words[i] + repeatString(padChar, padding);
         }
 
         return result;

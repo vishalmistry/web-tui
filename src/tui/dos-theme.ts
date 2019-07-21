@@ -32,6 +32,13 @@ export class DosTheme implements Theme {
         disabled: { ...this.default.disabled },
     };
 
+    textBox = {
+        normal: { ...this.default.normal },
+        hover: { ...this.default.hover },
+        focused: { ...this.default.focused },
+        disabled: { ...this.default.disabled },
+    };
+
     private constructor() {
     }
 }
