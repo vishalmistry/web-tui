@@ -274,16 +274,16 @@ export class View {
 
     protected invalidate(region?: Rect) {
         if (region === undefined) {
-            region = new Rect(0, 0, this.frame.width, this.frame.height);
+            region = this.bounds;
+        } else {
+            region = region.intersection(this.bounds);
+            if (region === undefined) {
+                return;
+            }
         }
 
         if (this.parent === undefined) {
-            if (this.invalidated.hasSubscribers) {
-                const redrawRegion = region.intersection(this.frame);
-                if (redrawRegion !== undefined) {
-                    this.invalidated.emit(redrawRegion);
-                }
-            }
+            this.invalidated.emit(region);
             return;
         }
 

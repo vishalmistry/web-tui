@@ -115,10 +115,14 @@ export class Application {
         const target = Application.findTarget(this.mainView, event.position.x, event.position.y);
 
         if (target.view !== this._hoverView) {
-            if (this._hoverView !== undefined && hasMouseLeaveHandler(this._hoverView)) {
+            if (this._hoverView !== undefined &&
+                this._hoverView.isEnabled &&
+                hasMouseLeaveHandler(this._hoverView)) {
                 this._hoverView.onMouseLeave();
             }
-            if (target.view !== undefined && hasMouseEnterHandler(target.view)) {
+            if (target.view !== undefined &&
+                target.view.isEnabled &&
+                hasMouseEnterHandler(target.view)) {
                 target.view.onMouseEnter();
             }
 
