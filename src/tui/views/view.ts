@@ -1,13 +1,18 @@
 import { ScreenContext } from '..';
 import { EventEmitter, Graph, Rect } from '../../common';
 import { Application } from '../application';
+import { ViewEvent } from '../interfaces';
 import { Dimension, Position } from '../layout';
 import { Theme } from '../theme';
+
+export interface RegionInvalidatedEvent extends ViewEvent {
+    region: Rect;
+}
 
 type LayoutMode = 'absolute' | 'computed';
 
 export class View {
-    public readonly invalidated = new EventEmitter<Rect>();
+    public readonly invalidated = new EventEmitter<RegionInvalidatedEvent>();
 
     private _parent?: View;
     private _children: View[] = [];
@@ -283,7 +288,7 @@ export class View {
         }
 
         if (this.parent === undefined) {
-            this.invalidated.emit(region);
+            this.invalidated.emit({ source: this, region });
             return;
         }
 

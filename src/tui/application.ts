@@ -9,6 +9,7 @@ import {
     hasMouseLeaveHandler,
     hasMouseMoveHandler,
     hasMouseUpHandler,
+    RegionInvalidatedEvent,
     ScreenContext,
     TUIKeyboardEvent,
     TUIMouseEvent,
@@ -16,27 +17,33 @@ import {
 } from '.';
 import { Rect } from '../common';
 import { Screen, ScreenKeyboardEvent, ScreenMouseEvent } from '../screen';
-import { RootView } from './internal/root-view';
+import { FillView } from './internal/fill-view';
 
 export class Application {
     private static readonly REDRAW_FREQ = 60;
 
-    public readonly mainView: View = new RootView(this);
-
-    private _invalidatedRegion: Rect | undefined;
+    private readonly _viewStack: View[] = [ new FillView() ];
+    private _invalidatedRegion?: Rect;
     private _redrawScheduled = false;
     private _hoverView?: View;
     private _mouseDownView?: View;
+    private _isRunning = false;
 
     constructor(private screen: Screen) {
     }
 
+    private get mainView() {
+        return this._viewStack[this._viewStack.length - 1];
+    }
+
     public start() {
-        if (this.mainView.layoutMode === 'computed') {
-            this.mainView.recalculateFrame(new Rect(0, 0, this.screen.columns, this.screen.rows));
+        for (const view of this._viewStack) {
+            if (view.layoutMode === 'computed') {
+                view.recalculateFrame(new Rect(0, 0, this.screen.columns, this.screen.rows));
+            }
+            view.invalidated.subscribe(this.scheduleRedraw);
         }
         this.scheduleRedraw();
-        this.mainView.invalidated.subscribe(this.scheduleRedraw);
 
         this.screen.resized.subscribe(this.onResize);
         this.screen.keyDown.subscribe(this.onKeyDown);
@@ -46,10 +53,14 @@ export class Application {
         this.screen.mouseDown.subscribe(this.onMouseDown);
         this.screen.mouseUp.subscribe(this.onMouseUp);
         this.screen.doubleClick.subscribe(this.onDoubleClick);
+
+        this._isRunning = true;
     }
 
     public stop() {
-        this.mainView.invalidated.unsubscribe(this.scheduleRedraw);
+        for (const view of this._viewStack) {
+            view.invalidated.unsubscribe(this.scheduleRedraw);
+        }
 
         this.screen.resized.unsubscribe(this.onResize);
         this.screen.keyDown.unsubscribe(this.onKeyDown);
@@ -59,10 +70,43 @@ export class Application {
         this.screen.mouseDown.unsubscribe(this.onMouseDown);
         this.screen.mouseUp.unsubscribe(this.onMouseUp);
         this.screen.doubleClick.unsubscribe(this.onDoubleClick);
+
+        this._isRunning = false;
     }
 
-    private scheduleRedraw = (region?: Rect) => {
-        region = region === undefined ? this.mainView.bounds : region;
+    public showModal(view: View) {
+        this._viewStack.push(view);
+
+        if (this._isRunning) {
+            if (view.layoutMode === 'computed') {
+                view.recalculateFrame(new Rect(0, 0, this.screen.columns, this.screen.rows));
+            }
+            view.invalidated.subscribe(this.scheduleRedraw);
+            this.scheduleRedraw({ source: view, region: view.bounds });
+        }
+    }
+
+    public dismissModal() {
+        if (this._viewStack.length === 1) {
+            return;
+        }
+
+        const view = this._viewStack.pop() as View;
+        if (this._isRunning) {
+            view.invalidated.unsubscribe(this.scheduleRedraw);
+            this.scheduleRedraw({ source: view, region: view.bounds });
+        }
+    }
+
+    private scheduleRedraw = (event?: RegionInvalidatedEvent) => {
+        const region = event === undefined
+            ? new Rect(0, 0, this.screen.columns, this.screen.rows)
+            : new Rect(
+                event.source.frame.x + event.region.x,
+                event.source.frame.y + event.region.y,
+                event.region.width,
+                event.region.height);
+
         if (this._invalidatedRegion === undefined) {
             this._invalidatedRegion = region;
         } else {
@@ -80,9 +124,20 @@ export class Application {
             return;
         }
 
-        const refreshContext = new ScreenContext(this.screen, this.mainView);
-        refreshContext.setClip(this._invalidatedRegion);
-        this.mainView.draw(refreshContext, this._invalidatedRegion);
+        for (const view of this._viewStack) {
+            const intersection = this._invalidatedRegion.intersection(view.frame);
+            if (intersection !== undefined) {
+                const viewRegion = new Rect(
+                    intersection.x - view.frame.x,
+                    intersection.y - view.frame.y,
+                    intersection.width,
+                    intersection.height);
+
+                const viewCtx = new ScreenContext(this.screen, view);
+                viewCtx.setClip(viewRegion);
+                view.draw(viewCtx, viewRegion);
+            }
+        }
 
         if (this.mainView.focusedView !== undefined) {
             this.mainView.focusedView.positionCursor(
@@ -96,10 +151,11 @@ export class Application {
     }
 
     private onResize = () => {
-        if (this.mainView.layoutMode === 'computed') {
-            this.mainView.recalculateFrame(new Rect(0, 0, this.screen.columns, this.screen.rows));
+        for (const view of this._viewStack) {
+            if (view.layoutMode === 'computed') {
+                view.recalculateFrame(new Rect(0, 0, this.screen.columns, this.screen.rows));
+            }
         }
-        this.redrawInvalidatedRegion();
     }
 
     private onKeyDown = (event: ScreenKeyboardEvent) =>
