@@ -24,6 +24,7 @@ export class Application {
     private static readonly REDRAW_FREQ = 60;
 
     private readonly _viewStack: View[] = [ new FillView() ];
+    private readonly _focusStack = new Array<View | undefined>();
     private _invalidatedRegion?: Rect;
     private _redrawScheduled = false;
     private _hoverView?: View;
@@ -79,8 +80,14 @@ export class Application {
         if (view instanceof ModalView) {
             view.setApplication(this);
         }
-        this._viewStack.push(view);
 
+        const focusedView = this.mainView.focusedView;
+        this._focusStack.push(focusedView);
+        if (focusedView !== undefined) {
+            focusedView.hasFocus = false;
+        }
+
+        this._viewStack.push(view);
         if (this._isRunning) {
             if (view.layoutMode === 'computed') {
                 view.recalculateFrame(new Rect(0, 0, this.screen.columns, this.screen.rows));
@@ -98,6 +105,11 @@ export class Application {
         const view = this._viewStack.pop() as View;
         if (view instanceof ModalView) {
             view.setApplication(undefined);
+        }
+
+        const lastFocusedView = this._focusStack.pop();
+        if (lastFocusedView !== undefined) {
+            lastFocusedView.hasFocus = true;
         }
 
         if (this._isRunning) {

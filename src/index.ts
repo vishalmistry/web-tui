@@ -1,18 +1,18 @@
 import { Screen } from './screen';
+import { DosColors } from './screen/dos-colors';
 import {
     Application,
     Button,
     CheckBox,
     Dimension,
+    DosTheme,
     Frame,
     Label,
     Position,
     RadioGroup,
     TextBox,
     Window,
-    DosTheme,
 } from './tui';
-import { DosColors } from './screen/dos-colors';
 
 const app = document.getElementById('app') as HTMLDivElement;
 
@@ -24,9 +24,7 @@ screen.isKeyboardEnabled = true;
 screen.captureTabKey = true;
 screen.isCursorVisible = true;
 
-const mainWindow = new Window('Demo', 80, 30);
-mainWindow.x = 10;
-mainWindow.y = 2;
+const mainWindow = new Window('Demo');
 
 const enabledCheckbox = new CheckBox('Enable all the things');
 enabledCheckbox.isChecked = true;
@@ -92,7 +90,7 @@ button.y = Position.end().subtract(1);
 mainControls.addChild(button);
 
 const modalButton = new Button('Ka-boom');
-modalButton.x = Position.rightOf(button).add(1);
+modalButton.x = Position.rightOf(button).add(2);
 modalButton.y = Position.topOf(button);
 mainControls.addChild(modalButton);
 
