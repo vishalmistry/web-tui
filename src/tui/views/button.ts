@@ -17,7 +17,7 @@ export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, On
 
     private _isMouseOver = false;
 
-    constructor(private _text: string, private _autoSize = true) {
+    public constructor(private _text: string, private _autoSize = true) {
         super();
         this.canFocus = true;
         this.resizeToText();

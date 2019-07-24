@@ -7,7 +7,7 @@ type TextPosition = 'left' | 'center' | 'right' | 'justify';
 
 export class Label extends View {
 
-    constructor(private _text: string, private _textPosition: TextPosition = 'left', private _autoSize = true) {
+    public constructor(private _text: string, private _textPosition: TextPosition = 'left', private _autoSize = true) {
         super();
         this.resizeToText();
     }

@@ -20,7 +20,7 @@ export class TextBox extends View implements OnMouseDown, OnKeyPress, OnKeyDown,
     private _viewStart = 0;
     private _cursorPosition = 0;
 
-    constructor(private _text: string = '', private _isSecret = false) {
+    public constructor(private _text: string = '', private _isSecret = false) {
         super();
         this.canFocus = true;
         this.height = Dimension.sized(1);

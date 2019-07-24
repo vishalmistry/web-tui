@@ -17,7 +17,7 @@ export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, 
 
     private _isMouseOver = false;
 
-    constructor(private _text: string, private _isChecked = false) {
+    public constructor(private _text: string, private _isChecked = false) {
         super();
         this.canFocus = true;
         this.resizeToText();

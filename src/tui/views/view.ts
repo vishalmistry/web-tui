@@ -31,7 +31,7 @@ export class View {
     private _width: Dimension | undefined;
     private _height: Dimension | undefined;
 
-    constructor(frame?: Rect) {
+    public constructor(frame?: Rect) {
         if (frame === undefined) {
             this._layoutMode = 'computed';
             this._frame = Rect.EMPTY;

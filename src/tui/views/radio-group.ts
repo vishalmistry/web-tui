@@ -20,7 +20,7 @@ export class RadioGroup extends View implements OnMouseDown, OnMouseUp, OnKeyPre
     private _mouseDownIndex = -1;
     private _focusedIndex = 0;
 
-    constructor(private _items: string[], private _selectedIndex = -1) {
+    public constructor(private _items: string[], private _selectedIndex = -1) {
         super();
         this.canFocus = true;
         this.resizeToItems();

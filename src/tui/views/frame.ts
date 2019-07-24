@@ -12,7 +12,7 @@ export class Frame extends View {
     private _frameStyle: FrameStyle = 'single';
     private _fill = false;
 
-    constructor(private _header: string, frame?: Rect) {
+    public constructor(private _header: string, frame?: Rect) {
         super(frame);
 
         this._contentView = new View();
