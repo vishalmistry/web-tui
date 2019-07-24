@@ -18,6 +18,7 @@ import {
 import { Rect } from '../common';
 import { Screen, ScreenKeyboardEvent, ScreenMouseEvent } from '../screen';
 import { FillView } from './internal/fill-view';
+import { ModalView } from './views/modal-view';
 
 export class Application {
     private static readonly REDRAW_FREQ = 60;
@@ -75,6 +76,9 @@ export class Application {
     }
 
     public showModal(view: View) {
+        if (view instanceof ModalView) {
+            view.setApplication(this);
+        }
         this._viewStack.push(view);
 
         if (this._isRunning) {
@@ -92,6 +96,10 @@ export class Application {
         }
 
         const view = this._viewStack.pop() as View;
+        if (view instanceof ModalView) {
+            view.setApplication(undefined);
+        }
+
         if (this._isRunning) {
             view.invalidated.unsubscribe(this.scheduleRedraw);
             this.scheduleRedraw({ source: view, region: view.bounds });

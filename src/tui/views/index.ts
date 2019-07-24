@@ -1,4 +1,6 @@
 export * from './view';
+export * from './modal-view';
+export * from './window';
 export * from './frame';
 export * from './label';
 export * from './button';

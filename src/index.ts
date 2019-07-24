@@ -9,7 +9,10 @@ import {
     Position,
     RadioGroup,
     TextBox,
+    Window,
+    DosTheme,
 } from './tui';
+import { DosColors } from './screen/dos-colors';
 
 const app = document.getElementById('app') as HTMLDivElement;
 
@@ -21,25 +24,22 @@ screen.isKeyboardEnabled = true;
 screen.captureTabKey = true;
 screen.isCursorVisible = true;
 
-const application = new Application(screen);
-
-const rootFrame = new Frame('Demo');
-rootFrame.headerPosition = 'center';
-rootFrame.frameStyle = 'double';
-rootFrame.fill = true;
+const mainWindow = new Window('Demo', 80, 30);
+mainWindow.x = 10;
+mainWindow.y = 2;
 
 const enabledCheckbox = new CheckBox('Enable all the things');
 enabledCheckbox.isChecked = true;
 enabledCheckbox.x = Position.center();
 enabledCheckbox.y = 1;
-rootFrame.addChild(enabledCheckbox);
+mainWindow.addChild(enabledCheckbox);
 
 const mainControls = new Frame('');
 mainControls.x = 1;
 mainControls.width = Dimension.fill().subtract(1);
 mainControls.y = Position.bottomOf(enabledCheckbox).add(1);
 mainControls.height = Dimension.fill().subtract(1);
-rootFrame.addChild(mainControls);
+mainWindow.addChild(mainControls);
 
 const label = new Label('Do something with the stuff below');
 label.x = 1;
@@ -91,6 +91,11 @@ button.x = 1;
 button.y = Position.end().subtract(1);
 mainControls.addChild(button);
 
+const modalButton = new Button('Ka-boom');
+modalButton.x = Position.rightOf(button).add(1);
+modalButton.y = Position.topOf(button);
+mainControls.addChild(modalButton);
+
 enabledCheckbox.checkChanged.subscribe((event) => {
     mainControls.isEnabled = event.newValue;
 });
@@ -120,5 +125,49 @@ button.clicked.subscribe(() => {
     label.text = 'You pressed the button.';
 });
 
-application.mainView.addChild(rootFrame);
+modalButton.clicked.subscribe((event) => {
+    const window = new Window('Error', 40, 10);
+    window.theme = {
+        ...DosTheme.instance,
+        default: {
+            ...DosTheme.instance.default,
+            normal: { background: DosColors.red, foreground: DosColors.brightWhite },
+        },
+        button: {
+            normal: { background: DosColors.red, foreground: DosColors.brightYellow },
+            hover: { background: DosColors.brightYellow, foreground: DosColors.red },
+            focused: { background: DosColors.brightYellow, foreground: DosColors.red },
+            disabled: { background: DosColors.red, foreground: DosColors.grey },
+        },
+    };
+
+    const message = new Label('Something blew up!');
+    message.x = Position.center();
+    message.y = 1;
+    window.addChild(message);
+
+    const changeThemeBtn = new Button('Stop Panicking');
+    changeThemeBtn.x = Position.center().subtract(6);
+    changeThemeBtn.y = Position.end().subtract(1);
+    window.addChild(changeThemeBtn);
+
+    const closeBtn = new Button('Close');
+    closeBtn.x = Position.rightOf(changeThemeBtn).add(2);
+    closeBtn.y = Position.end().subtract(1);
+    window.addChild(closeBtn);
+
+    changeThemeBtn.clicked.subscribe(() => {
+        window.theme = DosTheme.instance;
+        closeBtn.x = Position.center();
+        closeBtn.hasFocus = true;
+
+        window.removeChild(changeThemeBtn);
+    });
+    closeBtn.clicked.subscribe((ce) => ce.source.application.dismissModal());
+
+    event.source.application.showModal(window);
+});
+
+const application = new Application(screen);
+application.showModal(mainWindow);
 application.start();
