@@ -96,7 +96,7 @@ export class ScreenContext {
             this._cursorLocation.y,
             str.length,
             1);
-        const intersection = strRect.intersection(this._clip);
+        const intersection = this.getDrawRegion(strRect);
         if (intersection === undefined) {
             return;
         }
@@ -113,7 +113,7 @@ export class ScreenContext {
             this._cursorLocation.y,
             length,
             1);
-        const intersection = drawRect.intersection(this._clip);
+        const intersection = this.getDrawRegion(drawRect);
         if (intersection === undefined) {
             return;
         }
@@ -130,7 +130,7 @@ export class ScreenContext {
             this._cursorLocation.y,
             1,
             length);
-        const intersection = drawRect.intersection(this._clip);
+        const intersection = this.getDrawRegion(drawRect);
         if (intersection === undefined) {
             return;
         }
@@ -147,10 +147,11 @@ export class ScreenContext {
             rect.y + this._bounds.y,
             rect.width,
             rect.height);
-        const intersection = absoluteRect.intersection(this._clip);
+        const intersection = this.getDrawRegion(absoluteRect);
         if (intersection === undefined) {
             return;
         }
+
         const frameChars = style === 'single'
             ? ScreenContext.SINGLE_FRAME_CHARS
             : ScreenContext.DOUBLE_FRAME_CHARS;
@@ -246,6 +247,18 @@ export class ScreenContext {
                this._cursorLocation.y >= 0 &&
                this._cursorLocation.x < this._screen.columns &&
                this._cursorLocation.y < this._screen.rows;
+    }
+
+    private getDrawRegion(drawArea: Rect) {
+        const screenRect = new Rect(0, 0, this._screen.columns, this._screen.rows);
+        let intersection: Rect | undefined = drawArea;
+        for (const r of [screenRect, this._clip]) {
+            intersection = intersection.intersection(r);
+            if (intersection === undefined) {
+                return;
+            }
+        }
+        return intersection;
     }
 
     private static calculateViewBounds(view: View): Rect {
