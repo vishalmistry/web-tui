@@ -1,7 +1,7 @@
+import { View } from '.';
 import { centerString, justifyString, leftAlignString, Rect, rightAlignString } from '../../common';
 import { Dimension } from '../layout';
 import { ScreenContext } from '../screen-context';
-import { View } from '../views';
 
 type TextPosition = 'left' | 'center' | 'right' | 'justify';
 

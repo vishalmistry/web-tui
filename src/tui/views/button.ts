@@ -1,3 +1,4 @@
+import { View } from '.';
 import { ScreenContext } from '..';
 import { centerString, EventEmitter, Rect } from '../../common';
 import {
@@ -10,7 +11,6 @@ import {
     ViewEvent,
 } from '../interfaces';
 import { Dimension } from '../layout';
-import { View } from '../views';
 
 export class Button extends View implements OnMouseDown, OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave {
     public clicked = new EventEmitter<ViewEvent>();

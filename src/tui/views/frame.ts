@@ -1,7 +1,7 @@
+import { View } from '.';
 import { Rect } from '../../common';
 import { Dimension, Position } from '../layout';
 import { ScreenContext } from '../screen-context';
-import { View } from '../views';
 
 type HeaderPosition = 'left' | 'center' | 'right';
 type FrameStyle = 'single' | 'double';

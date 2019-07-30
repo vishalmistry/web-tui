@@ -1,3 +1,4 @@
+import { View } from '.';
 import { ScreenContext, TUIMouseEvent } from '..';
 import { EventEmitter, Rect } from '../../common';
 import {
@@ -10,7 +11,6 @@ import {
     ValueChangedEvent,
 } from '../interfaces';
 import { Dimension } from '../layout';
-import { View } from '../views';
 
 export class CheckBox extends View implements OnMouseDown, OnClick, OnKeyPress, OnMouseEnter, OnMouseLeave {
     public checkChanged = new EventEmitter<ValueChangedEvent<boolean>>();

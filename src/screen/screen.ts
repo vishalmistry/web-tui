@@ -320,8 +320,9 @@ export class Screen {
     private onCanvasKeyPress = (event: KeyboardEvent) => this.fireKeyboardEvent(event, 'keypress', this.keyPress);
     private onCanvasContextMenu = (event: MouseEvent) => event.preventDefault();
     private onCanvasMouseMove = (event: MouseEvent) => {
-        const posX = Math.floor(event.clientX / this._glyphWidth);
-        const posY = Math.floor(event.clientY / this._glyphHeight);
+        const canvasRect = this._canvas.getBoundingClientRect();
+        const posX = Math.floor((event.clientX - canvasRect.left) / this._glyphWidth);
+        const posY = Math.floor((event.clientY - canvasRect.top) / this._glyphHeight);
 
         if (posX < this.columns && posY < this.rows) {
             if (this.mouseLocation.x !== posX || this.mouseLocation.y !== posY) {

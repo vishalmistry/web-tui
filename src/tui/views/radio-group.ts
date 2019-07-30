@@ -1,8 +1,8 @@
+import { View } from '.';
 import { ScreenContext, TUIMouseEvent } from '..';
 import { EventEmitter, Rect } from '../../common';
 import {
     OnKeyDown,
-    OnKeyPress,
     OnMouseDown,
     OnMouseLeave,
     OnMouseMove,
@@ -11,9 +11,8 @@ import {
     ValueChangedEvent,
 } from '../interfaces';
 import { Dimension } from '../layout';
-import { View } from '../views';
 
-export class RadioGroup extends View implements OnMouseDown, OnMouseUp, OnKeyPress, OnKeyDown, OnMouseLeave, OnMouseMove {
+export class RadioGroup extends View implements OnMouseDown, OnMouseUp, OnKeyDown, OnMouseLeave, OnMouseMove {
     public selectionChanged = new EventEmitter<ValueChangedEvent<number>>();
 
     private _mouseOverIndex = -1;
@@ -116,7 +115,7 @@ export class RadioGroup extends View implements OnMouseDown, OnMouseUp, OnKeyPre
         }
     }
 
-    onKeyPress(event: TUIKeyboardEvent): void {
+    onKeyDown(event: TUIKeyboardEvent): void {
         let newFocusedIndex = this._focusedIndex;
         switch (event.key) {
             case ' ':
@@ -134,10 +133,6 @@ export class RadioGroup extends View implements OnMouseDown, OnMouseUp, OnKeyPre
             this._focusedIndex = newFocusedIndex;
             this.invalidate();
         }
-    }
-
-    onKeyDown(event: TUIKeyboardEvent): void {
-        this.onKeyPress(event);
     }
 
     private setSelectedIndex(index: number) {
