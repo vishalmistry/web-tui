@@ -203,7 +203,11 @@ export class View {
             this.parent.setFocusedChild(value ? this : undefined);
         }
 
-        this.invalidate();
+        if (value) {
+            this.onFocus();
+        } else {
+            this.onBlur();
+        }
     }
 
     public get isEnabled(): boolean {
@@ -419,7 +423,7 @@ export class View {
                 return true;
             }
 
-            if (child.focusNext()) {
+            if (child.children.length > 0 && child.focusNext()) {
                 return true;
             }
         }
@@ -469,5 +473,13 @@ export class View {
         }
 
         return false;
+    }
+
+    protected onFocus() {
+        this.invalidate();
+    }
+
+    protected onBlur() {
+        this.invalidate();
     }
 }

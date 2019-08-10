@@ -233,12 +233,16 @@ export class Screen {
         glyph.background = this.background;
     }
 
-    public print(str: string): void {
+    public print(...items: ReadonlyArray<string | number | ReadonlyArray<number>>): void {
         let x = this.cursorLocation.x;
         let y = this.cursorLocation.y;
-        for (const c of str) {
+        const printChar = (c: string | number) => {
             const glyph = this._state[y][x++];
-            glyph.character = c;
+            if (typeof c === 'number') {
+                glyph.code = c;
+            } else {
+                glyph.character = c;
+            }
             glyph.foreground = this.foreground;
             glyph.background = this.background;
 
@@ -249,6 +253,16 @@ export class Screen {
                     x--;
                 } else {
                     x = 0;
+                }
+            }
+        };
+
+        for (const item of items) {
+            if (typeof item === 'number') {
+                printChar(item);
+            } else {
+                for (const c of item) {
+                    printChar(c);
                 }
             }
         }

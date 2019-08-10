@@ -11,6 +11,19 @@ export class DosTheme implements Theme {
         disabled: { background: DosColors.blue, foreground: DosColors.grey },
     };
 
+    menuBar = {
+        normal: { background: DosColors.grey, foreground: DosColors.black },
+        selected: { background: DosColors.blue, foreground: DosColors.brightWhite },
+        disabled: { background: DosColors.grey, foreground: DosColors.grey },
+    };
+
+    menu = {
+        frame: { ...this.menuBar.normal },
+        normal: { ...this.menuBar.normal },
+        focused: { background: DosColors.blue, foreground: DosColors.brightWhite },
+        disabled: { background: this.menuBar.normal.background, foreground: DosColors.grey },
+    };
+
     button = {
         normal: { ...this.default.normal },
         hover: { ...this.default.hover },

@@ -19,7 +19,7 @@ export class RadioGroup extends View implements OnMouseDown, OnMouseUp, OnKeyDow
     private _mouseDownIndex = -1;
     private _focusedIndex = 0;
 
-    public constructor(private _items: string[], private _selectedIndex = -1) {
+    public constructor(private _items: ReadonlyArray<string>, private _selectedIndex = -1) {
         super();
         this.canFocus = true;
         this.resizeToItems();
@@ -29,7 +29,7 @@ export class RadioGroup extends View implements OnMouseDown, OnMouseUp, OnKeyDow
         return this._items;
     }
 
-    public set items(value: string[]) {
+    public set items(value: ReadonlyArray<string>) {
         this._items = value;
         this._selectedIndex = -1;
         this._focusedIndex = 0;
@@ -159,7 +159,7 @@ export class RadioGroup extends View implements OnMouseDown, OnMouseUp, OnKeyDow
         return x < (item.length + 4) ? y : -1;
     }
 
-    private static calculateWidth(items: string[]) {
+    private static calculateWidth(items: ReadonlyArray<string>) {
         let maxLen = 0;
         for (const item of items) {
             maxLen = Math.max(maxLen, item.length);

@@ -10,8 +10,23 @@ export interface SimpleColorScheme {
     readonly disabled: Colors;
 }
 
+export interface MenuBarColorScheme {
+    readonly normal: Colors;
+    readonly selected: Colors;
+    readonly disabled: Colors;
+}
+
+export interface MenuColorScheme {
+    readonly frame: Colors;
+    readonly normal: Colors;
+    readonly focused: Colors;
+    readonly disabled: Colors;
+}
+
 export interface Theme {
     readonly default: SimpleColorScheme;
+    readonly menuBar: MenuBarColorScheme;
+    readonly menu: MenuColorScheme;
     readonly button: SimpleColorScheme;
     readonly checkBox: SimpleColorScheme;
     readonly radioGroup: SimpleColorScheme;
