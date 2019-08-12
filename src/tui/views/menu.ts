@@ -45,20 +45,27 @@ export class Menu extends View implements OnMouseMove, OnMouseDown, OnMouseUp, O
                 continue;
             }
 
+            const isFocused = (i === this._focusedIndex);
             if (!item.isEnabled) {
                 ctx.setColors(colors.disabled);
-            } else if (i === this._focusedIndex) {
+            } else if (isFocused) {
                 ctx.setColors(colors.focused);
             } else {
                 ctx.setColors(colors.normal);
             }
 
             ctx.moveTo(1, i + 1);
-            ctx.print(leftAlignString(` ${item.title} `, this.bounds.width - 2));
+            ctx.print(leftAlignString(` ${item.displayText} `, this.bounds.width - 2));
 
             if (item.children.length > 0) {
                 ctx.moveTo(this.bounds.width - 3, i + 1);
                 ctx.setCharacter(16);
+            }
+
+            if (item.hotKeyPosition >= 0 && item.isEnabled) {
+                ctx.setColors(isFocused ? colors.focusedHotKey : colors.hotKey);
+                ctx.moveTo(item.hotKeyPosition + 2, i + 1);
+                ctx.setCharacter(item.displayText[item.hotKeyPosition]);
             }
         }
     }
@@ -99,13 +106,13 @@ export class Menu extends View implements OnMouseMove, OnMouseDown, OnMouseUp, O
     }
 
     onKeyDown(event: TUIKeyboardEvent) {
+        if (event.metaKey || event.ctrlKey || event.altKey) {
+            return;
+        }
+
         let newFocusedIndex = this._focusedIndex;
         do {
             switch (event.key) {
-                case 'Return':
-                case 'Enter':
-                    this.fireItemAction(this._focusedIndex);
-                    break;
                 case 'Escape':
                     this._host.closeMenu();
                     break;
@@ -130,19 +137,31 @@ export class Menu extends View implements OnMouseMove, OnMouseDown, OnMouseUp, O
                     }
                     break;
                 case 'Tab':
-                    if (event.metaKey || event.ctrlKey || event.altKey) {
-                        break;
-                    }
                     if (event.shiftKey) {
                         this._host.openPreviousMenu();
                     } else {
                         this._host.openNextMenu();
                     }
                     break;
+                case 'Return':
+                case 'Enter':
+                    this.fireItemAction(this._focusedIndex);
+                    break;
+                default: {
+                    for (let i = 0; i < this._items.length; i++) {
+                        const item = this._items[i];
+                        if (item.hotKey !== undefined && event.key.toUpperCase() === item.hotKey.toUpperCase()) {
+                            newFocusedIndex = i;
+                            this.fireItemAction(i);
+                            break;
+                        }
+                    }
+                }
             }
-        } while (this._items[newFocusedIndex].isSeparator &&
+        } while (newFocusedIndex >= 0 &&
                  newFocusedIndex !== 0 &&
-                 newFocusedIndex !== this._items.length - 1);
+                 newFocusedIndex !== this._items.length - 1 &&
+                 this._items[newFocusedIndex].isSeparator);
 
         if (newFocusedIndex !== this._focusedIndex && !this._items[newFocusedIndex].isSeparator) {
             this._focusedIndex = newFocusedIndex;
@@ -208,7 +227,7 @@ export class Menu extends View implements OnMouseMove, OnMouseDown, OnMouseUp, O
 
     private resizeToItems() {
         const width = this._items
-            .map((item) => item.title.length + (item.children.length > 0 ? 2 : 0))
+            .map((item) => item.displayText.length + (item.children.length > 0 ? 2 : 0))
             .reduce((acc, curr) => Math.max(acc, curr), 0);
         const height = this._items.length;
 

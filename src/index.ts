@@ -8,6 +8,9 @@ import {
     DosTheme,
     Frame,
     Label,
+    MenuBar,
+    MenuItem,
+    ModalView,
     Position,
     RadioGroup,
     TextBox,
@@ -24,7 +27,46 @@ screen.isKeyboardEnabled = true;
 screen.captureTabKey = true;
 screen.isCursorVisible = true;
 
-const mainWindow = new Window('Demo');
+const workspace = new ModalView();
+
+const menu = new MenuBar([
+    new MenuItem('~F~ile', [
+        new MenuItem('~N~ew'),
+        new MenuItem('-'),
+        new MenuItem('~O~pen...', [
+            new MenuItem('Whaa...', [
+                new MenuItem('Blaahh'),
+            ]),
+        ]),
+        new MenuItem('~S~ave', [
+            new MenuItem('To ~D~isk'),
+            new MenuItem('To ~C~loud'),
+        ]),
+        new MenuItem('-'),
+        new MenuItem('E~x~it'),
+    ]),
+    new MenuItem('~E~dit', [
+        new MenuItem('Undo'),
+        new MenuItem('Redo'),
+        new MenuItem('-'),
+        new MenuItem('Cut'),
+        new MenuItem('Copy'),
+        new MenuItem('Paste'),
+    ]),
+    new MenuItem('~W~indow', [
+        new MenuItem('New'),
+        new MenuItem('Close'),
+    ]),
+]);
+
+workspace.addChild(menu);
+
+const mainWindow = new Frame('Demo');
+mainWindow.frameStyle = 'double';
+mainWindow.fill = true;
+mainWindow.y = 1;
+mainWindow.height = Dimension.fill();
+workspace.addChild(mainWindow);
 
 const enabledCheckbox = new CheckBox('Enable all the things');
 enabledCheckbox.isChecked = true;
@@ -98,6 +140,19 @@ enabledCheckbox.checkChanged.subscribe((event) => {
     mainControls.isEnabled = event.newValue;
 });
 
+const wireUpMenuClicked = (m: MenuItem) => {
+    m.clicked.subscribe((event) => {
+        label.text = `You clicked the '${event.source.title}' menu item.`;
+    });
+    for (const n of m.children) {
+        wireUpMenuClicked(n);
+    }
+};
+
+for (const menuBarItem of menu.items) {
+    wireUpMenuClicked(menuBarItem);
+}
+
 checkBox.checkChanged.subscribe((event) => {
     label.text = `You ${event.newValue ? 'checked' : 'unchecked'} the checkbox.`;
     if (event.newValue) {
@@ -167,5 +222,5 @@ modalButton.clicked.subscribe((event) => {
 });
 
 const application = new Application(screen);
-application.showModal(mainWindow);
+application.showModal(workspace);
 application.start();

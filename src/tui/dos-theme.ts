@@ -13,15 +13,19 @@ export class DosTheme implements Theme {
 
     menuBar = {
         normal: { background: DosColors.grey, foreground: DosColors.black },
-        selected: { background: DosColors.blue, foreground: DosColors.brightWhite },
+        hotKey: { background: DosColors.grey, foreground: DosColors.red },
+        focused: { background: DosColors.blue, foreground: DosColors.brightWhite },
+        focusedHotKey: { background: DosColors.blue, foreground: DosColors.brightRed },
         disabled: { background: DosColors.grey, foreground: DosColors.grey },
     };
 
     menu = {
         frame: { ...this.menuBar.normal },
         normal: { ...this.menuBar.normal },
-        focused: { background: DosColors.blue, foreground: DosColors.brightWhite },
-        disabled: { background: this.menuBar.normal.background, foreground: DosColors.grey },
+        hotKey: { ...this.menuBar.hotKey },
+        focused: { ...this.menuBar.focused },
+        focusedHotKey: { ...this.menuBar.focusedHotKey },
+        disabled: { ...this.menuBar.disabled },
     };
 
     button = {

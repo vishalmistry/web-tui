@@ -12,14 +12,18 @@ export interface SimpleColorScheme {
 
 export interface MenuBarColorScheme {
     readonly normal: Colors;
-    readonly selected: Colors;
+    readonly hotKey: Colors;
+    readonly focused: Colors;
+    readonly focusedHotKey: Colors;
     readonly disabled: Colors;
 }
 
 export interface MenuColorScheme {
     readonly frame: Colors;
     readonly normal: Colors;
+    readonly hotKey: Colors;
     readonly focused: Colors;
+    readonly focusedHotKey: Colors;
     readonly disabled: Colors;
 }
 
