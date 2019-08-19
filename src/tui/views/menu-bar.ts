@@ -8,6 +8,7 @@ import { Menu } from './menu';
 export class MenuBar extends View implements OnClick {
     private _selectedIndex = -1;
     private _openMenu?: Menu;
+    private _previousFocus?: View;
 
     public constructor(private _items: ReadonlyArray<MenuItem>) {
         super();
@@ -69,6 +70,8 @@ export class MenuBar extends View implements OnClick {
     }
 
     onClick(event: TUIMouseEvent) {
+        this.hasFocus = true;
+
         const newSelection = this.getItemIndexAtPosition(event.x);
         if (newSelection >= 0 && newSelection !== this._selectedIndex) {
             this.openMenu(newSelection);
@@ -95,7 +98,7 @@ export class MenuBar extends View implements OnClick {
         }
     }
 
-    public closeMenu() {
+    public closeMenu(restorePreviousFocus = true) {
         if (this._openMenu === undefined) {
             return;
         }
@@ -105,6 +108,21 @@ export class MenuBar extends View implements OnClick {
 
         this._openMenu.close();
         this._openMenu = undefined;
+
+        if (restorePreviousFocus && this._previousFocus !== undefined) {
+            this._previousFocus.hasFocus = true;
+            this._previousFocus = undefined;
+        }
+    }
+
+    protected onFocus(previousFocus?: View) {
+        if (this._selectedIndex < 0) {
+            this._previousFocus = previousFocus;
+        }
+    }
+
+    protected onBlur() {
+        // No-op
     }
 
     private openMenu(index: number) {
@@ -112,7 +130,7 @@ export class MenuBar extends View implements OnClick {
             return;
         }
 
-        this.closeMenu();
+        this.closeMenu(false);
 
         this._selectedIndex = index;
         this.invalidate();

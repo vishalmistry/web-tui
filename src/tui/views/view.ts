@@ -194,8 +194,9 @@ export class View {
             return;
         }
 
+        let previousFocus: View | undefined;
         if (value) {
-            this.clearCurrentFocus();
+            previousFocus = this.clearCurrentFocus();
         }
 
         this._hasFocus = value;
@@ -204,7 +205,7 @@ export class View {
         }
 
         if (value) {
-            this.onFocus();
+            this.onFocus(previousFocus);
         } else {
             this.onBlur();
         }
@@ -236,8 +237,10 @@ export class View {
         view._parent = this;
 
         if (view.hasFocus) {
-            this.clearCurrentFocus();
+            const previousFocus = this.clearCurrentFocus();
             this.setFocusedChild(view);
+
+            view.onFocus(previousFocus);
         }
         this.layoutChildren();
         this.invalidate(view.frame);
@@ -395,7 +398,7 @@ export class View {
         }
     }
 
-    private clearCurrentFocus() {
+    private clearCurrentFocus(): View | undefined {
         let v: View = this;
         while (v.parent !== undefined && v._focusedChild === undefined) {
             v = v.parent;
@@ -404,7 +407,9 @@ export class View {
         const focused = v._focusedChild || v;
         if (focused !== undefined) {
             focused.hasFocus = false;
+            return focused;
         }
+        return undefined;
     }
 
     public focusNext(fromChild?: View): boolean {
@@ -475,7 +480,7 @@ export class View {
         return false;
     }
 
-    protected onFocus() {
+    protected onFocus(_previousFocus?: View) {
         this.invalidate();
     }
 

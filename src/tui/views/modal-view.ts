@@ -19,6 +19,14 @@ export class ModalView extends View implements OnKeyDown {
         return this._application;
     }
 
+    protected onFocus() {
+        // No-op
+    }
+
+    protected onBlur() {
+        // No-op
+    }
+
     onKeyDown(event: TUIKeyboardEvent): void {
         if (event.key === 'Tab') {
             if (event.shiftKey) {

@@ -13,4 +13,12 @@ export class FillView extends View {
             }
         }
     }
+
+    protected onFocus() {
+        // No-op
+    }
+
+    protected onBlur() {
+        // No-op
+    }
 }
