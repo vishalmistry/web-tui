@@ -22,10 +22,11 @@ import { ModalView } from './views/modal-view';
 
 export class Application {
     private static readonly REDRAW_FREQ = 60;
+    private static readonly UNION_DRAW = false;
 
     private readonly _viewStack: View[] = [ new FillView() ];
     private readonly _focusStack = new Array<View | undefined>();
-    private _invalidatedRegion?: Rect;
+    private _invalidatedRegions = new Array<Rect>();
     private _redrawScheduled = false;
     private _hoverView?: View;
     private _mouseDownView?: View;
@@ -127,10 +128,25 @@ export class Application {
                 event.region.width,
                 event.region.height);
 
-        if (this._invalidatedRegion === undefined) {
-            this._invalidatedRegion = region;
+        if (this._invalidatedRegions.length === 0) {
+            this._invalidatedRegions.push(region);
         } else {
-            this._invalidatedRegion = this._invalidatedRegion.union(region);
+            if (Application.UNION_DRAW) {
+                this._invalidatedRegions[0] = this._invalidatedRegions[0].union(region);
+            } else {
+                let hasIntersections = false;
+                for (let i = 0; i < this._invalidatedRegions.length; i++) {
+                    const current = this._invalidatedRegions[i];
+                    if (current.intersection(region) !== undefined) {
+                        this._invalidatedRegions[i] = current.union(region);
+                        hasIntersections = true;
+                    }
+                }
+
+                if (!hasIntersections) {
+                    this._invalidatedRegions.push(region);
+                }
+            }
         }
 
         if (!this._redrawScheduled) {
@@ -140,22 +156,24 @@ export class Application {
     }
 
     private redrawInvalidatedRegion = () => {
-        if (this._invalidatedRegion === undefined) {
+        if (this._invalidatedRegions.length === 0) {
             return;
         }
 
-        for (const view of this._viewStack) {
-            const intersection = this._invalidatedRegion.intersection(view.frame);
-            if (intersection !== undefined) {
-                const viewRegion = new Rect(
-                    intersection.x - view.frame.x,
-                    intersection.y - view.frame.y,
-                    intersection.width,
-                    intersection.height);
+        for (const invalidatedRegion of this._invalidatedRegions) {
+            for (const view of this._viewStack) {
+                const intersection = invalidatedRegion.intersection(view.frame);
+                if (intersection !== undefined) {
+                    const viewRegion = new Rect(
+                        intersection.x - view.frame.x,
+                        intersection.y - view.frame.y,
+                        intersection.width,
+                        intersection.height);
 
-                const viewCtx = new ScreenContext(this.screen, view);
-                viewCtx.setClip(viewRegion);
-                view.draw(viewCtx, viewRegion);
+                    const viewCtx = new ScreenContext(this.screen, view);
+                    viewCtx.setClip(viewRegion);
+                    view.draw(viewCtx, viewRegion);
+                }
             }
         }
 
@@ -166,7 +184,7 @@ export class Application {
             this.screen.moveTo(0, 0);
         }
 
-        this._invalidatedRegion = undefined;
+        this._invalidatedRegions = [];
         this._redrawScheduled = false;
     }
 
