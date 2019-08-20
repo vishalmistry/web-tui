@@ -20,6 +20,10 @@ export class TextBox extends View implements OnMouseDown, OnKeyPress, OnKeyDown,
     private _viewStart = 0;
     private _cursorPosition = 0;
 
+    private _previousCursorVisibility = false;
+    private _justFocused = false;
+    private _justLostFocus = false;
+
     public constructor(private _text: string = '', private _isSecret = false) {
         super();
         this.canFocus = true;
@@ -90,10 +94,29 @@ export class TextBox extends View implements OnMouseDown, OnKeyPress, OnKeyDown,
         const text = this._isSecret ? repeatString('*', this.text.length) : this.text;
         const visibleText = text.substr(this._viewStart);
         ctx.print(leftAlignString(visibleText, this.bounds.width));
+
+        if (this._justFocused) {
+            this._previousCursorVisibility = ctx.isCursorVisible;
+            ctx.isCursorVisible = true;
+            this._justFocused = false;
+        } else if (this._justLostFocus) {
+            ctx.isCursorVisible = this._previousCursorVisibility;
+            this._justLostFocus = false;
+        }
     }
 
     public positionCursor(ctx: ScreenContext) {
         ctx.moveTo(this._cursorPosition - this._viewStart, 0);
+    }
+
+    protected onFocus(previousFocus?: View) {
+        this._justFocused = true;
+        super.onFocus(previousFocus);
+    }
+
+    protected onBlur() {
+        this._justLostFocus = true;
+        super.onBlur();
     }
 
     onMouseEnter(): void {
