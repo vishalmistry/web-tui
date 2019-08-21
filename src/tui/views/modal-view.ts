@@ -28,25 +28,33 @@ export class ModalView extends View implements OnKeyDown {
     }
 
     onKeyDown(event: TUIKeyboardEvent): void {
-        if (event.key === 'Tab') {
-            if (event.shiftKey) {
-                if (this.focusedView !== undefined) {
-                    if (!this.focusedView.focusPrevious()) {
-                        this.focusLast();
-                    }
-                } else {
+        if (event.altKey || event.ctrlKey || event.metaKey || event.key !== 'Tab') {
+            return;
+        }
+
+        if (event.shiftKey) {
+            if (this.focusedView !== undefined) {
+                if (!this.focusedView.focusPrevious()) {
                     this.focusLast();
                 }
             } else {
-                if (this.focusedView !== undefined) {
-                    if (!this.focusedView.focusNext()) {
-                        this.focusNext();
-                    }
-                } else {
+                this.focusLast();
+            }
+        } else {
+            if (this.focusedView !== undefined) {
+                if (!this.focusedView.focusNext()) {
                     this.focusNext();
                 }
+            } else {
+                this.focusNext();
             }
         }
+
+        // Prevent browser responding
+        event.preventDefault();
+
+        // Prevent bubbling up
+        event.handled = true;
     }
 
     setApplication(value?: Application) {

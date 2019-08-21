@@ -1,6 +1,6 @@
 import { View } from './views';
 
-export type TUIKeyboardEventType = 'keyup' | 'keydown' | 'keypress';
+export type TUIKeyboardEventType = 'keyup' | 'keydown' | 'keypress' | 'hotkey';
 export type TUIMouseEventType = 'mousemove' | 'mousedown' | 'mouseup' | 'click' | 'dblclick';
 
 export interface TUIInputEvent<T extends string> {
@@ -11,6 +11,7 @@ export interface TUIInputEvent<T extends string> {
     readonly metaKey: boolean;
     readonly source: View;
     handled: boolean;
+    preventDefault: () => void;
 }
 
 export interface TUIKeyboardEvent extends TUIInputEvent<TUIKeyboardEventType> {
@@ -22,6 +23,13 @@ export interface TUIMouseEvent extends TUIInputEvent<TUIMouseEventType> {
     readonly x: number;
     readonly y: number;
     readonly buttons: number;
+}
+
+export interface OnHotKeyDown {
+    onHotKeyDown(event: TUIKeyboardEvent): void;
+}
+export function hasHotKeyDownHandler<T>(object: T): object is T & OnHotKeyDown {
+    return object !== undefined && typeof (object as any).onHotKeyDown === 'function';
 }
 
 export interface OnKeyDown {

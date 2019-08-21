@@ -1,6 +1,7 @@
 import {
     hasClickHandler,
     hasDoubleClickHandler,
+    hasHotKeyDownHandler,
     hasKeyDownHandler,
     hasKeyPressHandler,
     hasKeyUpHandler,
@@ -196,8 +197,21 @@ export class Application {
         }
     }
 
-    private onKeyDown = (event: ScreenKeyboardEvent) =>
-        this.fireKeyboardEvent(event, hasKeyDownHandler, (v, args) => v.onKeyDown(args))
+    private onKeyDown = (event: ScreenKeyboardEvent) => {
+        const hotKeyEvent: TUIKeyboardEvent = {
+            ...event,
+            type: 'hotkey',
+            source: this.mainView as View,
+            handled: false,
+        };
+        this.fireHotKeyEvent(this.mainView, hotKeyEvent);
+        if (hotKeyEvent.handled) {
+            event.preventDefault();
+            return;
+        }
+
+        this.fireKeyboardEvent(event, hasKeyDownHandler, (v, args) => v.onKeyDown(args));
+    }
 
     private onKeyUp = (event: ScreenKeyboardEvent) =>
         this.fireKeyboardEvent(event, hasKeyUpHandler, (v, args) => v.onKeyUp(args))
@@ -257,11 +271,16 @@ export class Application {
             view = this.mainView;
         }
 
+        const keyboardEvent: TUIKeyboardEvent = {
+            ...event,
+            source: this.mainView.focusedView as View,
+            handled: false,
+        };
+
         while (view !== undefined) {
             if (view.isEnabled && guard(view)) {
-                const arg = {...event, source: this.mainView.focusedView as View, handled: false };
-                handler(view, arg);
-                if (arg.handled) {
+                handler(view, keyboardEvent);
+                if (keyboardEvent.handled) {
                     break;
                 }
             }
@@ -293,6 +312,19 @@ export class Application {
             viewX = viewX + view.frame.x;
             viewY = viewY + view.frame.y;
             view = view.parent;
+        }
+    }
+
+    private fireHotKeyEvent(view: View, event: TUIKeyboardEvent) {
+        for (const child of view.children) {
+            this.fireHotKeyEvent(child, event);
+            if (event.handled) {
+                return;
+            }
+        }
+
+        if (hasHotKeyDownHandler(view)) {
+            view.onHotKeyDown(event);
         }
     }
 

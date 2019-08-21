@@ -1,11 +1,11 @@
 import { MenuItem, View } from '.';
 import { ScreenContext } from '..';
 import { Rect, repeatString } from '../../common';
-import { OnClick, TUIMouseEvent } from '../interfaces';
+import { OnClick, OnHotKeyDown, TUIKeyboardEvent, TUIMouseEvent } from '../interfaces';
 import { Dimension } from '../layout';
 import { Menu } from './menu';
 
-export class MenuBar extends View implements OnClick {
+export class MenuBar extends View implements OnClick, OnHotKeyDown {
     private _selectedIndex = -1;
     private _openMenu?: Menu;
     private _previousFocus?: View;
@@ -69,17 +69,6 @@ export class MenuBar extends View implements OnClick {
         ctx.moveTo(currentEnd + 1, 0);
     }
 
-    onClick(event: TUIMouseEvent) {
-        this.hasFocus = true;
-
-        const newSelection = this.getItemIndexAtPosition(event.x);
-        if (newSelection >= 0 && newSelection !== this._selectedIndex) {
-            this.openMenu(newSelection);
-        } else {
-            this.closeMenu();
-        }
-    }
-
     public openNextMenu() {
         const newSelectedIndex = (this._selectedIndex + 1) % this._items.length;
         if (newSelectedIndex !== this._selectedIndex) {
@@ -112,6 +101,41 @@ export class MenuBar extends View implements OnClick {
         if (restorePreviousFocus && this._previousFocus !== undefined) {
             this._previousFocus.hasFocus = true;
             this._previousFocus = undefined;
+        }
+    }
+
+    onClick(event: TUIMouseEvent) {
+        this.hasFocus = true;
+
+        const newSelection = this.getItemIndexAtPosition(event.x);
+        if (newSelection >= 0 && newSelection !== this._selectedIndex) {
+            this.openMenu(newSelection);
+        } else {
+            this.closeMenu();
+        }
+    }
+
+    onHotKeyDown(event: TUIKeyboardEvent): void {
+        const needsMetaModifier = !!navigator.platform && /Mac/.test(navigator.platform);
+
+        if (event.shiftKey ||
+            event.ctrlKey ||
+            (!needsMetaModifier && !event.altKey) ||
+            (needsMetaModifier && !event.metaKey) ||
+            event.key === undefined ||
+            event.key.length !== 1) {
+            return;
+        }
+
+        this.hasFocus = true;
+
+        const key = event.key.toLowerCase();
+        for (let i = 0; i < this._items.length; i++) {
+            const item = this._items[i];
+            if (item.hotKey !== undefined && item.hotKey.toLowerCase() === key) {
+                this.openMenu(i);
+                event.handled = true;
+            }
         }
     }
 

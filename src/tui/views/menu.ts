@@ -3,6 +3,8 @@ import { ScreenContext } from '..';
 import { leftAlignString, Rect } from '../../common';
 import {
     OnKeyDown,
+    OnKeyPress,
+    OnKeyUp,
     OnMouseDown,
     OnMouseMove,
     OnMouseUp,
@@ -12,7 +14,7 @@ import {
 import { Dimension } from '../layout';
 import { MenuBar } from './menu-bar';
 
-export class Menu extends View implements OnMouseMove, OnMouseDown, OnMouseUp, OnKeyDown {
+export class Menu extends View implements OnMouseMove, OnMouseDown, OnMouseUp, OnKeyDown, OnKeyUp, OnKeyPress {
     private _focusedIndex: number;
     private _openSubMenu?: Menu;
 
@@ -168,6 +170,17 @@ export class Menu extends View implements OnMouseMove, OnMouseDown, OnMouseUp, O
             this.invalidate();
         }
 
+        event.preventDefault();
+        event.handled = true;
+    }
+
+    onKeyUp(event: TUIKeyboardEvent) {
+        event.preventDefault();
+        event.handled = true;
+    }
+
+    onKeyPress(event: TUIKeyboardEvent) {
+        event.preventDefault();
         event.handled = true;
     }
 

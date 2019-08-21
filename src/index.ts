@@ -24,8 +24,7 @@ const screen = new Screen(app);
 screen.isResizable = true;
 screen.isMouseEnabled = true;
 screen.isKeyboardEnabled = true;
-screen.captureTabKey = true;
-screen.isCursorVisible = true;
+screen.isCursorVisible = false;
 
 const workspace = new ModalView();
 
@@ -53,7 +52,7 @@ const menu = new MenuBar([
         new MenuItem('Copy'),
         new MenuItem('Paste'),
     ]),
-    new MenuItem('~W~indow', [
+    new MenuItem('W~i~ndow', [
         new MenuItem('New'),
         new MenuItem('Close'),
     ]),
