@@ -4,17 +4,21 @@
   "version": "0.1.0",
   "author": "Vishal Mistry",
   "license": "MIT",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "webpack",
+    "build": "tsc",
     "lint": "tslint --project ."
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vishalmistry/web-tui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vishalmistry/web-tui/issues"
+  },
   "devDependencies": {
-    "ts-loader": "^5.3.3",
-    "tslint": "^5.15.0",
-    "typescript": "^3.4.3",
-    "typescript-tslint-plugin": "^0.3.1",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0"
+    "tslint": "^5.20.0",
+    "typescript": "^3.6.4",
+    "typescript-tslint-plugin": "^0.3.1"
   }
 }

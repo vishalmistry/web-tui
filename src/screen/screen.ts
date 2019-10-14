@@ -75,7 +75,7 @@ export class Screen {
     private _originalCanvasTabIndex = -1;
 
     private _isMouseEnabled = false;
-    private _originalCanvasCursor: string | null = null;
+    private _originalCanvasCursor = '';
     private _mouseLocation: Point = { x: 0, y: 0 };
 
     constructor(private _container: HTMLElement, dimensions?: Size, palette?: Palette) {
