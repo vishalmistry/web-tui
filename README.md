@@ -37,7 +37,7 @@ A demo of how to use the the TUI Framework is available at the [web-tui-demo](ht
 
 ## Credits
 
-The layout engine is a reimplementation of the one written by Miguel de Icaza for his [gui.cs](https://github.com/migueldeicaza/gui.cs) project. The there was used as a reference to produce the implementation here.
+The layout engine is a reimplementation of the one written by Miguel de Icaza for his [gui.cs](https://github.com/migueldeicaza/gui.cs) project - it was used as a reference to produce the implementation here.
 
 ## To-do
 
